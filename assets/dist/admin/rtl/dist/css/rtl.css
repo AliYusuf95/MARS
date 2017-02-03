@@ -1,0 +1,28 @@
+@media (max-width: 767px) {
+    .sidebar-open .main-sidebar, .sidebar-open .left-side {
+        -webkit-transform: translate(231px, 0);
+        -ms-transform: translate(231px, 0);
+        -o-transform: translate(231px, 0);
+        transform: translate(-231px, 0);
+    }
+
+    .main-sidebar, .left-side {
+        -webkit-transform: translate(-230px, 0);
+        -ms-transform: translate(-230px, 0);
+        -o-transform: translate(-230px, 0);
+        transform: translate(230px, 0);
+    }
+}
+
+.sidebar-mini.sidebar-collapse .main-sidebar .treeview .fa-angle-left{
+    display: none !important;
+}
+
+.alert .icon {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+.input-group-addon:first-child {
+    border-color: #d2d6de;
+}
