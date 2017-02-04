@@ -111,7 +111,7 @@ $config['ci_bootstrap'] = array(
                 'مواد الصفوف'           => 'year/class_subject',
             )
         ),
-        'staff_crew' => array(
+        /*'staff_crew' => array(
             'name'        => 'الهيئة التعليمية',
             'url'         => 'semester',
             'icon'        => 'fa fa-briefcase',
@@ -121,7 +121,7 @@ $config['ci_bootstrap'] = array(
                 'الإشراف'                => 'staff_crew/staff',
                 'المدرسين'                => 'staff_crew/teacher',
             )
-        ),
+        ),*/
         'teacher' => array(
             'name'        => 'المدرسين',
             'url'         => 'semester',
@@ -144,13 +144,14 @@ $config['ci_bootstrap'] = array(
             )
         ),
         'panel' => array(
-            'name'        => 'Admin Panel',
+            'name'        => 'لوحة تحكم الإدارة',
             'url'         => 'panel',
             'icon'        => 'fa fa-cog',
             'children'  => array(
-                'Admin Users'            => 'panel/admin_user',
+                'جميع الأعضاء'            => 'panel/admin_user',
                 'Create Admin User'        => 'panel/admin_user_create',
                 'Admin User Groups'        => 'panel/admin_user_group',
+                'Admin User Permissions'        => 'panel/admin_group_permission',
             )
         ),
         'util' => array(

@@ -19,27 +19,49 @@ class Panel extends Admin_Controller {
 	// Admin Users CRUD
 	public function admin_user()
 	{
-		$crud = $this->generate_crud('admin_users');
-		$crud->columns('groups', 'username', 'first_name', 'last_name', 'active');
-		$this->unset_crud_fields('ip_address', 'last_login');
-
-		// cannot change Admin User groups once created
-		if ($crud->getState()=='list')
-		{
-			$crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'name');
-		}
+		$crud = $this->generate_crud('admin_users', 'كادر تعليمي');
+//        if ($crud->getState()=='list')
+//        {
+//            $crud->set_model('Custom_CRUD_model');
+//            $crud->basic_model
+//                ->set_custom_query('SELECT * FROM admin_users LEFT JOIN admin_users_groups
+//ON admin_users.id = admin_users_groups.user_id LEFT JOIN admin_groups
+//ON admin_users_groups.group_id = admin_groups.id WHERE admin_users_groups.group_id != 1');
+//        }
+//        else {
+//
+//        }
+        $crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'description');
+        //$crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'name');
+        $crud->columns('username', 'name','groups', 'active');
+        $crud->edit_fields('groups');
+        $crud->fields('name', 'username', 'mobile', 'email', 'active', 'groups')
+            ->display_as('name', 'الإسم')
+            ->display_as('username', 'مسمى تسجيل الدخول')
+            ->display_as('mobile', 'رقم الهاتف')
+            ->display_as('groups', 'المجموعة')
+            ->display_as('active', 'الحالة')
+            ->display_as('email', 'البريد الإلكتروني');
 
 		// only webmaster can reset Admin User password
 		if ( $this->ion_auth->in_group(array('webmaster', 'admin')) )
 		{
 			$crud->add_action('Reset Password', '', $this->mModule.'/panel/admin_user_reset_password', 'fa fa-repeat');
 		}
-		
+
+		if ($this->verify_page(false, 'panel/admin_user/add_admin')) {
+            // TODO: validation rule
+            //$crud->set_rules('groups[]','المجموعة','required');
+            //$crud->set_rules('groups','مجموعة','required');
+
+        } else {
+            $crud->unset_add();
+        }
+
 		// disable direct create / delete Admin User
-		$crud->unset_add();
 		$crud->unset_delete();
 
-		$this->mPageTitle = 'Admin Users';
+		$this->mPageTitle = 'قائمة أعضاء الكادر التعليمي';
 		$this->render_crud();
 	}
 
@@ -97,9 +119,10 @@ class Panel extends Admin_Controller {
 		$this->render_crud();
 	}
 
-    // Admin User Groups CRUD
+    // Admin User Groups Permission CRUD
     public function admin_group_permission()
     {
+        $this->verify_page();
         $crud = $this->generate_crud('admin_groups');
         $this->mPageTitle = 'Admin Groups Permissions';
         $crud->set_relation_n_n('permissions', 'admin_groups_permissions', 'admin_permissions',
@@ -108,11 +131,20 @@ class Panel extends Admin_Controller {
         $this->render_crud();
     }
 
+    // Admin User Permission CRUD
+    public function admin_permission()
+    {
+        $this->verify_page();
+        $crud = $this->generate_crud('admin_permissions');
+        $this->mPageTitle = 'Admin Permissions';
+        $this->render_crud();
+    }
+
 	// Admin User Reset password
 	public function admin_user_reset_password($user_id)
 	{
 		// only top-level users can reset Admin User passwords
-		$this->verify_auth(array('webmaster'));
+		$this->verify_page(array('webmaster'));
 
 		$form = $this->form_builder->create_form();
 		if ($form->validate())

@@ -5313,7 +5313,7 @@ if(defined('CI_VERSION'))
 	$ci = &get_instance();
 	$ci->load->library('Form_validation');
 
-	class grocery_CRUD_Form_validation extends CI_Form_validation{
+	class grocery_CRUD_Form_validation extends MY_Form_validation{
 
 		public $CI;
 		public $_field_data			= array();

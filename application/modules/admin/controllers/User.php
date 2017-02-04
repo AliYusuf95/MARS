@@ -47,7 +47,7 @@ class User extends Admin_Controller {
         }
 
         // only webmaster and admin can reset user password
-        if ($this->ion_auth->in_group(array('webmaster', 'admin')))
+        if ($this->verify_page(false,'user/reset_password'))
         {
             $crud->add_action('Reset Password', '', 'admin/user/reset_password', 'fa fa-repeat');
         }

@@ -23,7 +23,25 @@ class Admin_Controller extends MY_Controller {
 		$this->mUsefulLinks = $this->mConfig['useful_links'];
 	}
 
-	// Render template (override parent)
+    protected function verify_page($redirect = TRUE, $url = NULL, $redirect_url = NULL)
+    {
+        $this->load->model('Admin_groups_permission_model', 'permission');
+        if ( !$this->ion_auth->logged_in() ||
+            !$this->permission->validate($this->ion_auth->get_users_groups()->result(),$url))
+        {
+            if (!$redirect)
+                return FALSE;
+
+            if ( $redirect_url==NULL )
+                $redirect_url = base_url('admin');
+
+            redirect($redirect_url);
+        }
+        return TRUE;
+    }
+
+
+    // Render template (override parent)
 	protected function render($view_file, $layout = 'default')
 	{
 		// load skin according to user role

@@ -7,3 +7,4 @@
  */
 
 $lang['form_validation_compare_pk'] 		= 'يجب أن لا تكون هنالك قيمة مكررة.';
+$lang['form_validation_not_value'] 		= 'القيمة المدخلة غير صحيحة.';
