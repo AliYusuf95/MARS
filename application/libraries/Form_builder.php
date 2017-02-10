@@ -225,7 +225,7 @@ class Form {
 	public function bs3_password($label, $name = 'password', $value = NULL, $extra = array())
 	{
         $extra['class'] = isset($extra['class']) ? $extra['class'].' form-control' : 'form-control';
-		return '<div class="form-group">'.form_label($label, $name,array('class'=>'control-label col-md-2')).$this->field_password($name, $value, $extra).'</div>';
+		return '<div class="form-group">'.form_label($label, $name,array('class'=>'control-label')).$this->field_password($name, $value, $extra).'</div>';
 	}
 
 	public function bs3_textarea($label, $name, $value = NULL, $extra = array())

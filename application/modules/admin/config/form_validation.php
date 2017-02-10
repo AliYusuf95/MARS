@@ -82,28 +82,33 @@ $config = array(
 	'panel/admin_user_create' => array(
 		array(
 			'field'		=> 'username',
-			'label'		=> 'Username',
-			'rules'		=> 'required|is_unique[users.username]',
+			'label'		=> 'مسمى تسجيل الدخول',
+			'rules'		=> 'required|is_unique[users.username]|is_not_arabic_text',
 		),
 		array(
-			'field'		=> 'first_name',
-			'label'		=> 'First Name',
+			'field'		=> 'name',
+			'label'		=> 'الإسم',
 			'rules'		=> 'required',
 		),
-		/* Admin User can have no email
+		// Admin User can have no email
 		array(
 			'field'		=> 'email',
-			'label'		=> 'Email',
+			'label'		=> 'البريد الإلكتروني',
 			'rules'		=> 'valid_email|is_unique[users.email]',
-		),*/
+		),
+        array(
+            'field'		=> 'mobile',
+            'label'		=> 'الهاتف',
+            'rules'		=> 'exact_length[8]',
+        ),
 		array(
 			'field'		=> 'password',
-			'label'		=> 'Password',
+			'label'		=> 'كلمة المرور',
 			'rules'		=> 'required',
 		),
 		array(
 			'field'		=> 'retype_password',
-			'label'		=> 'Retype Password',
+			'label'		=> 'تأكيد كلمة المرور',
 			'rules'		=> 'required|matches[password]',
 		),
 	),

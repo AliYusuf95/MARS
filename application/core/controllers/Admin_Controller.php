@@ -21,6 +21,8 @@ class Admin_Controller extends MY_Controller {
 
 		// store site config values
 		$this->mUsefulLinks = $this->mConfig['useful_links'];
+        //$this->load->model('Admin_groups_permission_model', 'permission');
+        //$this->mPageAuth = $this->permission->get_pages_auth();
 	}
 
     protected function verify_page($redirect = TRUE, $url = NULL, $redirect_url = NULL)

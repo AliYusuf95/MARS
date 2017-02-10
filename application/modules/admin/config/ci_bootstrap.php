@@ -148,10 +148,9 @@ $config['ci_bootstrap'] = array(
             'url'         => 'panel',
             'icon'        => 'fa fa-cog',
             'children'  => array(
-                'جميع الأعضاء'            => 'panel/admin_user',
-                'Create Admin User'        => 'panel/admin_user_create',
-                '_المجموعات'        => 'panel/admin_user_group',
-                'المجموعات'        => 'panel/admin_group_permission',
+                'جميع الأعضاء'            => 'panel/admin_users',
+                'إضافة عضو'        => 'panel/admin_user_create',
+                'المجموعات'        => 'panel/groups',
             )
         ),
         'util' => array(

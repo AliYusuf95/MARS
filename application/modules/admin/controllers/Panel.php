@@ -19,10 +19,10 @@ class Panel extends Admin_Controller {
 	}
 
 	// Admin Users CRUD
-	public function admin_user()
+	public function admin_users()
 	{
 	    // Check webmaster
-	    if (!$isWebmaster = $this->verify_page(false, 'panel/admin_user/add_webmaster'))
+	    if (!$isWebmaster = $this->verify_page(false, 'panel/admin_users/add_webmaster'))
 	        $where_cause = array('admin_groups.id !='=>1);
 	    else
             $where_cause = null;
@@ -41,12 +41,15 @@ class Panel extends Admin_Controller {
             ->display_as('email', 'البريد الإلكتروني');
 
 		// only webmaster can reset Admin User password
-		if ( $this->ion_auth->in_group(array('webmaster', 'admin')) )
-		{
-			$crud->add_action('Reset Password', '', $this->mModule.'/panel/admin_user_reset_password', 'fa fa-repeat');
-		}
+		if(!$this->verify_page(false, 'panel/admin_users/delete'))
+            $crud->unset_delete();
 
-		if ($this->verify_page(false, 'panel/admin_user/add_admin') && !$isWebmaster) {
+        if($this->verify_page(false, 'panel/admin_user_reset_password'))
+        {
+            $crud->add_action('Reset Password', '', $this->mModule.'/panel/admin_user_reset_password', 'fa fa-repeat');
+        }
+
+		if ($this->verify_page(false, 'panel/admin_users/add_admin') && !$isWebmaster) {
             // This validation is used only for webmaster group
             if ($this->form_validation->run() == FALSE) {
                 $crud->set_rules('groups','مجموعة','required');
@@ -55,14 +58,21 @@ class Panel extends Admin_Controller {
             $crud->unset_add();
         }
 
-		// disable direct create / delete Admin User
-		$crud->unset_delete();
+        $crud->callback_before_insert(array($this,'insert_admin_user_callback'));
 
-		$this->mPageTitle = 'قائمة أعضاء الكادر التعليمي';
+        $this->mPageTitle = 'قائمة أعضاء الكادر التعليمي';
 		$this->render_crud();
 	}
 
-	// Create Admin User
+    function insert_admin_user_callback($post_array) {
+        $this->load->library('encrypt');
+        $key = 'super-secret-key';
+        $post_array['password'] = $this->encrypt->encode($post_array['password'], $key);
+
+        return $post_array;
+    }
+
+    // Create Admin User
 	public function admin_user_create()
 	{
 		// (optional) only top-level admin user groups can create Admin User
@@ -77,8 +87,8 @@ class Panel extends Admin_Controller {
 			$email = $this->input->post('email');
 			$password = $this->input->post('password');
 			$additional_data = array(
-				'first_name'	=> $this->input->post('first_name'),
-				'last_name'		=> $this->input->post('last_name'),
+				'name'	=> $this->input->post('name'),
+				'mobile'		=> $this->input->post('mobile'),
 			);
 			$groups = $this->input->post('groups');
 
@@ -102,22 +112,14 @@ class Panel extends Admin_Controller {
 		$groups = $this->ion_auth->groups()->result();
 		unset($groups[0]);	// disable creation of "webmaster" account
 		$this->mViewData['groups'] = $groups;
-		$this->mPageTitle = 'Create Admin User';
+		$this->mPageTitle = 'إضافة عضو';
 
 		$this->mViewData['form'] = $form;
 		$this->render('panel/admin_user_create');
 	}
 
-	// Admin User Groups CRUD
-	public function admin_user_group()
-	{
-		$crud = $this->generate_crud('admin_groups');
-		$this->mPageTitle = 'Admin User Groups';
-		$this->render_crud();
-	}
-
-    // Admin User Groups Permission CRUD
-    public function admin_group_permission()
+    // Admin User Groups with Permission CRUD
+    public function groups()
     {
         $this->verify_page();
         $crud = $this->generate_crud('admin_groups','مجموعة');
@@ -129,7 +131,15 @@ class Panel extends Admin_Controller {
             ->display_as('description', 'الوصف')
             ->display_as('permissions', 'الصلاحيات');
         $crud->set_rules('name','الإسم','is_not_arabic_text');
+        $crud->callback_field('name',array($this,'add_hint'));
+        $crud->required_fields(array('name','description'));
         $this->render_crud();
+    }
+
+    function add_hint($value = '', $primary_key = null)
+    {
+        return '<input id="field-name" class="form-control" value="'.$value
+            .'" name="name" type="text" value="manager" maxlength="20" REQUIRED> *الرجاء كتابة الإسم باللغة الإنجلينزية فقط.';
     }
 
     // Admin User Permission CRUD
