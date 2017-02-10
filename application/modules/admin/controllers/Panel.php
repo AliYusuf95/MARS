@@ -14,25 +14,22 @@ class Panel extends Admin_Controller {
 	{
 		parent::__construct();
 		$this->load->library('form_builder');
+        // Set Page small title
+        $this->mPageTitleSmall = 'لوحة تحكم الإدارة';
 	}
 
 	// Admin Users CRUD
 	public function admin_user()
 	{
+	    // Check webmaster
+	    if (!$isWebmaster = $this->verify_page(false, 'panel/admin_user/add_webmaster'))
+	        $where_cause = array('admin_groups.id !='=>1);
+	    else
+            $where_cause = null;
+
 		$crud = $this->generate_crud('admin_users', 'كادر تعليمي');
-//        if ($crud->getState()=='list')
-//        {
-//            $crud->set_model('Custom_CRUD_model');
-//            $crud->basic_model
-//                ->set_custom_query('SELECT * FROM admin_users LEFT JOIN admin_users_groups
-//ON admin_users.id = admin_users_groups.user_id LEFT JOIN admin_groups
-//ON admin_users_groups.group_id = admin_groups.id WHERE admin_users_groups.group_id != 1');
-//        }
-//        else {
-//
-//        }
-        $crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'description');
-        //$crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'name');
+        $crud->set_relation_n_n('groups', 'admin_users_groups', 'admin_groups', 'user_id', 'group_id', 'description',
+            null,$where_cause);
         $crud->columns('username', 'name','groups', 'active');
         $crud->edit_fields('groups');
         $crud->fields('name', 'username', 'mobile', 'email', 'active', 'groups')
@@ -49,12 +46,12 @@ class Panel extends Admin_Controller {
 			$crud->add_action('Reset Password', '', $this->mModule.'/panel/admin_user_reset_password', 'fa fa-repeat');
 		}
 
-		if ($this->verify_page(false, 'panel/admin_user/add_admin')) {
-            // TODO: validation rule
-            //$crud->set_rules('groups[]','المجموعة','required');
-            //$crud->set_rules('groups','مجموعة','required');
-
-        } else {
+		if ($this->verify_page(false, 'panel/admin_user/add_admin') && !$isWebmaster) {
+            // This validation is used only for webmaster group
+            if ($this->form_validation->run() == FALSE) {
+                $crud->set_rules('groups','مجموعة','required');
+            }
+        } else if (!$isWebmaster) {
             $crud->unset_add();
         }
 
@@ -123,11 +120,15 @@ class Panel extends Admin_Controller {
     public function admin_group_permission()
     {
         $this->verify_page();
-        $crud = $this->generate_crud('admin_groups');
-        $this->mPageTitle = 'Admin Groups Permissions';
+        $crud = $this->generate_crud('admin_groups','مجموعة');
+        $this->mPageTitle = 'المجموعات';
         $crud->set_relation_n_n('permissions', 'admin_groups_permissions', 'admin_permissions',
             'admin_group_id', 'admin_permission_id', 'description');
         $crud->where('id !=',1);
+        $crud->display_as('name', 'الإسم')
+            ->display_as('description', 'الوصف')
+            ->display_as('permissions', 'الصلاحيات');
+        $crud->set_rules('name','الإسم','is_not_arabic_text');
         $this->render_crud();
     }
 

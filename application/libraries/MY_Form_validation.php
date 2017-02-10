@@ -49,6 +49,13 @@ class MY_Form_validation extends CI_Form_validation {
         return FALSE;
     }
 
+    function is_not_arabic_text($str) {
+        $pattern = '/^([\x{0620}-\x{064a} ])+$/u';
+        if (preg_match($pattern, $str))
+            return FALSE;
+        return TRUE;
+    }
+
     function is_number($str) {
         $pattern = '/^([0-9]|[\x{0660}-\x{0669}])+$/u';
         if (preg_match($pattern, $str))

@@ -171,4 +171,12 @@ $config = array(
         )
     ),
 
+    'panel/admin_user' => array(
+        array(
+            'field'		=> 'groups[]',
+            'label'		=> 'التاريخ',
+            'rules'		=> 'required|not_value[1]',
+        )
+    ),
+
 );

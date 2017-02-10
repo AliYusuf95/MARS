@@ -150,8 +150,8 @@ $config['ci_bootstrap'] = array(
             'children'  => array(
                 'جميع الأعضاء'            => 'panel/admin_user',
                 'Create Admin User'        => 'panel/admin_user_create',
-                'Admin User Groups'        => 'panel/admin_user_group',
-                'Admin User Permissions'        => 'panel/admin_group_permission',
+                '_المجموعات'        => 'panel/admin_user_group',
+                'المجموعات'        => 'panel/admin_group_permission',
             )
         ),
         'util' => array(

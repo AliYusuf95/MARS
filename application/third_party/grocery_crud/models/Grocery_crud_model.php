@@ -109,7 +109,7 @@ class Grocery_crud_model  extends CI_Model  {
         foreach($this->relation_n_n as $relation_n_n)
         {
             list($field_name, $relation_table, $selection_table, $primary_key_alias_to_this_table,
-                        $primary_key_alias_to_selection_table, $title_field_selection_table, $priority_field_relation_table) = array_values((array)$relation_n_n);
+                        $primary_key_alias_to_selection_table, $title_field_selection_table, $priority_field_relation_table, $where_clause) = array_values((array)$relation_n_n);
 
             $primary_key_selection_table = $this->get_primary_key($selection_table);
 
@@ -129,7 +129,16 @@ class Grocery_crud_model  extends CI_Model  {
             //Sorry Codeigniter but you cannot help me with the subquery!
             $select .= ", (SELECT GROUP_CONCAT(DISTINCT $field) FROM $selection_table "
                 ."LEFT JOIN $relation_table ON $relation_table.$primary_key_alias_to_selection_table = $selection_table.$primary_key_selection_table "
-                ."WHERE $relation_table.$primary_key_alias_to_this_table = `{$this->table_name}`.$this_table_primary_key GROUP BY $relation_table.$primary_key_alias_to_this_table) AS $field_name";
+                ."WHERE $relation_table.$primary_key_alias_to_this_table = `{$this->table_name}`.$this_table_primary_key ";
+
+            if($where_clause)
+                foreach ($where_clause as $column => $value)
+                    $select .= "AND {$column} {$value} ";
+
+            $select .= "GROUP BY $relation_table.$primary_key_alias_to_this_table) AS $field_name";
+
+            if($where_clause)
+                $this->having("$field_name IS NOT", NULL);
         }
 
         return $select;

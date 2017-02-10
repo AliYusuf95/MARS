@@ -7,8 +7,6 @@ class Year extends Admin_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->library('form_validation');
-
         // Set Page small title
         $this->mPageTitleSmall = 'إعدادات السنة الدراسية';
     }
