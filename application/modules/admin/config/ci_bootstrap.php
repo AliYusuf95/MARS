@@ -90,7 +90,7 @@ $config['ci_bootstrap'] = array(
         ),
         'general' => array(
             'name'        => 'إعدادات عامة',
-            'url'         => 'term',
+            'url'         => 'general',
             'icon'        => 'fa fa-sliders',
             'children'  => array(
                 'السنوات الدراسية'      => 'general/terms',
@@ -101,7 +101,7 @@ $config['ci_bootstrap'] = array(
         ),
         'year' => array(
             'name'        => 'إعدادات السنة الدراسية',
-            'url'         => 'semester',
+            'url'         => 'year',
             'icon'        => 'fa fa-calendar',
             'children'  => array(
                 'الصفوف'                => 'year/classes',
@@ -124,7 +124,7 @@ $config['ci_bootstrap'] = array(
         ),*/
         'teacher' => array(
             'name'        => 'المدرسين',
-            'url'         => 'semester',
+            'url'         => 'teacher',
             'icon'        => 'fa fa-graduation-cap',
             'children'  => array(
                 'القائمة'               => 'teacher',
@@ -189,17 +189,18 @@ $config['ci_bootstrap'] = array(
     // AdminLTE settings
     'adminlte' => array(
         'body_class' => array(
-            'webmaster'    => 'skin-blue sidebar-mini',
-            'admin'        => 'skin-purple',
-            'manager'    => 'skin-black',
-            'staff'        => 'skin-blue',
+            'webmaster'    => 'skin-red sidebar-mini',
+            'admin'        => 'skin-purple sidebar-mini',
+            'manager'    => 'skin-black sidebar-mini',
+            'staff'        => 'skin-blue sidebar-mini',
         )
     ),
 
     // Useful links to display at bottom of sidemenu
     'useful_links' => array(
         array(
-            'auth'        => array('webmaster', 'admin', 'manager', 'staff'),
+            // Optional
+            //'auth'        => array('webmaster', 'admin', 'manager', 'staff'),
             'name'        => 'Mobile - الهاتف',
             'url'        => 'tel:+97337709595',
             'target'    => '_blank',
@@ -207,7 +208,6 @@ $config['ci_bootstrap'] = array(
             'color'        => 'text-green'
         ),
         array(
-            'auth'        => array('webmaster', 'admin'),
             'name'        => 'Instagram - إنستقرام',
             'url'        => 'https://www.instagram.com/mashrow/',
             'target'    => '_blank',
@@ -215,7 +215,6 @@ $config['ci_bootstrap'] = array(
             'color'        => 'text-orange'
         ),
         array(
-            'auth'        => array('webmaster', 'admin', 'manager', 'staff'),
             'name'        => 'Twitter - تويتر',
             'url'        => 'https://www.twitter.com/mashrow/',
             'target'    => '_blank',
@@ -223,29 +222,6 @@ $config['ci_bootstrap'] = array(
             'color'        => 'text-aqua'
         ),
     ),
-    /*'useful_links' => array(
-        array(
-            'auth'        => array('webmaster', 'admin', 'manager', 'staff'),
-            'name'        => 'Frontend Website',
-            'url'        => '',
-            'target'    => '_blank',
-            'color'        => 'text-aqua'
-        ),
-        array(
-            'auth'        => array('webmaster', 'admin'),
-            'name'        => 'API Site',
-            'url'        => 'api',
-            'target'    => '_blank',
-            'color'        => 'text-orange'
-        ),
-        array(
-            'auth'        => array('webmaster', 'admin', 'manager', 'staff'),
-            'name'        => 'Github Repo',
-            'url'        => CI_BOOTSTRAP_REPO,
-            'target'    => '_blank',
-            'color'        => 'text-green'
-        ),
-    ),*/
 
     // Debug tools
     'debug' => array(

@@ -48,7 +48,7 @@
 	<?php if ( !empty($useful_links) ): ?>
 		<li class="header">للتواصل</li>
 		<?php foreach ($useful_links as $link): ?>
-			<?php if ($this->ion_auth->in_group($link['auth']) ): ?>
+			<?php if (!isset($link['auth']) || $this->ion_auth->in_group($link['auth']) ): ?>
 			<li>
 				<a href="<?php echo starts_with($link['url'], 'http') || starts_with($link['url'], 'tel:') || starts_with($link['url'], 'whatsapp://') ? $link['url'] : base_url($link['url']); ?>" target='<?php echo $link['target']; ?>'>
 					<i class="fa <?php echo $link['icon']; ?> <?php echo $link['color']; ?>"></i>

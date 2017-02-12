@@ -21,20 +21,24 @@ class Admin_Controller extends MY_Controller {
 
 		// store site config values
 		$this->mUsefulLinks = $this->mConfig['useful_links'];
-        //$this->load->model('Admin_groups_permission_model', 'permission');
-        //$this->mPageAuth = $this->permission->get_pages_auth();
-	}
+
+		// Get Pages Auth from DB
+        $this->load->model('Admin_permission_model', 'permission');
+        $this->mPageAuth = $this->permission->getPagesAuth();
+        // Check page auth
+        $this->restrict_pages();
+    }
 
     protected function verify_page($redirect = TRUE, $url = NULL, $redirect_url = NULL)
     {
-        $this->load->model('Admin_groups_permission_model', 'permission');
-        if ( !$this->ion_auth->logged_in() ||
-            !$this->permission->validate($this->ion_auth->get_users_groups()->result(),$url))
+        $this->load->model('Admin_groups_permission_model', 'groups_permission');
+        $userGroups = $this->ion_auth->get_users_groups()->result();
+        if ( !$this->ion_auth->logged_in() || !$this->groups_permission->validateUrlForGroups($userGroups,$url))
         {
             if (!$redirect)
                 return FALSE;
 
-            if ( $redirect_url==NULL )
+            if ($redirect_url == NULL)
                 $redirect_url = base_url('admin');
 
             redirect($redirect_url);

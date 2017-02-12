@@ -121,9 +121,9 @@ class Panel extends Admin_Controller {
     // Admin User Groups with Permission CRUD
     public function groups()
     {
+        $this->mPageTitle = 'المجموعات';
         $this->verify_page();
         $crud = $this->generate_crud('admin_groups','مجموعة');
-        $this->mPageTitle = 'المجموعات';
         $crud->set_relation_n_n('permissions', 'admin_groups_permissions', 'admin_permissions',
             'admin_group_id', 'admin_permission_id', 'description');
         $crud->where('id !=',1);

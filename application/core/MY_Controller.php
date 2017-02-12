@@ -5,7 +5,7 @@
  * 	- MY_Controller: for Frontend Website
  * 	- Admin_Controller: for Admin Panel (require login), extends from MY_Controller
  * 	- API_Controller: for API Site, extends from REST_Controller
- *  @property Ion_auth_model ion_auth
+ *  @property Ion_auth_model|Ion_auth ion_auth
  */
 class MY_Controller extends MX_Controller {
 	
@@ -108,13 +108,7 @@ class MY_Controller extends MX_Controller {
 		}
 		
 		// restrict pages
-		$uri = ($this->mAction=='index') ? $this->mCtrler : $this->mCtrler.'/'.$this->mAction;
-		if ( !empty($this->mPageAuth[$uri]) && !$this->ion_auth->in_group($this->mPageAuth[$uri]) )
-		{
-			$page_404 = $this->router->routes['404_override'];
-			$redirect_url = empty($this->mModule) ? $page_404 : $this->mModule.'/'.$page_404;
-			redirect($redirect_url);
-		}
+        $this->restrict_pages();
 
 		// push first entry to breadcrumb
 		if ($this->mCtrler!='home')
@@ -138,6 +132,18 @@ class MY_Controller extends MX_Controller {
 
 		$this->mConfig = $config;
 	}
+
+    // restrict pages
+	protected function restrict_pages()
+    {
+        $uri = ($this->mAction=='index') ? $this->mCtrler : $this->mCtrler.'/'.$this->mAction;
+        if ( !empty($this->mPageAuth[$uri]) && !$this->ion_auth->in_group($this->mPageAuth[$uri]) )
+        {
+            $page_404 = $this->router->routes['404_override'];
+            $redirect_url = empty($this->mModule) ? $page_404 : $this->mModule.'/'.$page_404;
+            redirect($redirect_url);
+        }
+    }
 
 	// Verify user login (regardless of user group)
 	protected function verify_login($redirect_url = NULL)

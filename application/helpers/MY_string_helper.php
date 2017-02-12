@@ -15,3 +15,8 @@ function ends_with($haystack, $needle)
 {
 	return substr($haystack, -strlen($needle))===$needle;
 }
+
+function pretty_var($data)
+{
+    echo '<pre style="direction: ltr;">' . var_export($data, true) . '</pre>';
+}
