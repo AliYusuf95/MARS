@@ -83,7 +83,12 @@ $(function(){
 					$('#report-error').slideUp('fast');
 					$('#report-error').html(data.error_message);
 					$.each(data.error_fields, function(index,value){
-						$('input[name='+index+']').addClass('field_error');
+                        index = index.replace(/\[]/g, "\\[\\]");
+                        if (index.includes("\\[\\]") && $("input[name='" + index + "']").length == 0) {
+                            $('select[name^='+index+']').addClass('field_error');
+                        }
+                        else
+							$('input[name='+index+']').addClass('field_error');
 					});
 
 					$('#report-error').slideDown('normal');

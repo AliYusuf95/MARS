@@ -57,6 +57,33 @@ class Teacher extends Admin_Controller
 
         //render
         $this->render('user/attendance');
+    }
 
+    public function section()
+    {
+        // Setup crud
+        $crud = $this->generate_crud('admin_users_sections','مدرس صف');
+        if($crud->getState() != 'list')
+        {
+            $crud->columns('admin_user_id','section_id');
+            $crud->display_as('admin_user_id','المدرس')
+                ->display_as('section_id','الصف');
+            $crud->set_relation('admin_user_id','admin_users','{name} - {mobile}',null,'id');
+            $crud->set_relation('section_id','sections','title',null,'id');
+            $crud->required_fields('admin_user_id','section_id');
+            $crud->set_rules('section_id', 'الفرقة', 'compare_pk[admin_users_sections.section_id.admin_user_id]');
+
+        } else {
+            $crud = $this->generate_crud('admin_users', 'فرقة');
+            $crud->set_relation_n_n('sections','admin_users_sections','sections','admin_user_id','section_id','title',null,null);
+            $crud->columns('name', 'mobile', 'sections');
+            $crud->fields('name', 'mobile', 'sections')
+                ->display_as('name', 'الإسم')
+                ->display_as('mobile', 'رقم الهاتف')
+                ->display_as('sections', 'الفرق');
+        }
+
+        $this->mPageTitle = 'مدرسي الفرق';
+        $this->render_crud();
     }
 }

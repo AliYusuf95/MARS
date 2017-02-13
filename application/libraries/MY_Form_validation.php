@@ -18,18 +18,20 @@ class MY_Form_validation extends CI_Form_validation {
 		(is_object($module)) AND $this->CI =& $module;
 		return parent::run($group);
 	}
-	
-	/**
-	 * Custom rules
-	 */
 
+    /**
+     * Custom rules
+     * @param $str String Column1 value
+     * @param $field String {Table Name}.{Column1 Name}.{Column2 Name}
+     * @return bool
+     */
     public function compare_pk($str, $field)
     {
         $field1 = $field2 = '';
         sscanf($field, '%[^.].%[^.].%[^.]', $table,$field1,$field2);
-        return isset($this->CI->db , $this->_field_data[$field2])
-            ? ($this->CI->db->limit(1)->get_where(
-                    $table, array($field1 => $str,$field2 => $this->_field_data[$field2]['postdata']))->num_rows() === 0)
+        return (isset($this->CI->db , $this->_field_data[$field2])) ?
+            ($this->CI->db->limit(1)->get_where($table,
+                    array($field1 => $str,$field2 => $this->_field_data[$field2]['postdata']))->num_rows() === 0)
             : FALSE;
     }
 
