@@ -8,7 +8,7 @@ class Errors extends MY_Controller {
 	public function page_missing()
 	{
 		$this->output->set_status_header('404');
-		$this->mPageTitle = '404 Page Not Found';
+		$this->mPageTitle = '404 الصفحة غير موجودة';
 		$this->render('errors/custom/error_404');
 	}
 }

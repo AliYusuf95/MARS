@@ -2,16 +2,12 @@
 
 <div class="row">
 
-	<div class="col-md-12">
+	<div class="col-md-6">
 		<div class="box box-primary">
 			<div class="box-header">
 				<h3 class="box-title">معلومات العضو</h3>
 			</div>
 			<div class="box-body">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3">
-
-
 				<?php echo $form->open(); ?>
 
 					<?php echo $form->bs3_text('مسمى تسجيل الدخول', 'username'); ?>
@@ -29,6 +25,7 @@
 							<label class="checkbox-inline">
 								<input type="checkbox" name="groups[]" value="<?php echo $group->id; ?>"> <?php echo $group->description; ?>
 							</label>
+                            <br/>
 						<?php endforeach; ?>
 						</div>
 					</div>
@@ -37,8 +34,6 @@
 					<?php echo $form->bs3_submit('إضافة'); ?>
 					
 				<?php echo $form->close(); ?>
-                    </div>
-                </div>
 			</div>
 		</div>
 	</div>

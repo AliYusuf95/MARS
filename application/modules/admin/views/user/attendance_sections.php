@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="col-xs-12">
         <div class="box">
             <div class="box-header">
-                <h3 class="box-title">قائمة الصفوف</h3>
+                <h3 class="box-title">قائمة الفرق</h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -27,7 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </thead>
                     <tbody  id="students-table">
                     <?php $counter = 0 ; ?>
-                    <?php foreach ($classes as $class): ?>
+                    <?php foreach ($sections as $class): ?>
                         <tr>
                             <td><?php echo ++$counter; ?></td>
                             <td><a href="<?php echo current_url().'/'.$class["id"]; ?>" ><?php echo $class["title"]; ?></a></td>
@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <tfoot>
                     <tr>
                         <th>مجموع الصفوف</th>
-                        <th><?php echo count($classes) ?></th>
+                        <th><?php echo count($sections) ?></th>
                     </tr>
                     </tfoot>
                 </table>

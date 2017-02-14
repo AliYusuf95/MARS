@@ -9,6 +9,7 @@ class Year extends Admin_Controller {
         parent::__construct();
         // Set Page small title
         $this->mPageTitleSmall = 'إعدادات السنة الدراسية';
+        $this->push_breadcrumb($this->mPageTitleSmall);
     }
 
     public function classes()

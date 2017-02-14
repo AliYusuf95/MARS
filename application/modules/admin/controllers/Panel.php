@@ -16,6 +16,7 @@ class Panel extends Admin_Controller {
 		$this->load->library('form_builder');
         // Set Page small title
         $this->mPageTitleSmall = 'لوحة تحكم الإدارة';
+        $this->push_breadcrumb($this->mPageTitleSmall);
 	}
 
 	// Admin Users CRUD
@@ -40,6 +41,8 @@ class Panel extends Admin_Controller {
             ->display_as('active', 'الحالة')
             ->display_as('email', 'البريد الإلكتروني');
 
+        $crud->callback_field('username',array($this,'add_hint'));
+
 		// only webmaster can reset Admin User password
 		if(!$this->verify_page(false, 'panel/admin_users/delete'))
             $crud->unset_delete();
@@ -58,18 +61,15 @@ class Panel extends Admin_Controller {
             $crud->unset_add();
         }
 
-        $crud->callback_before_insert(array($this,'insert_admin_user_callback'));
-
         $this->mPageTitle = 'قائمة أعضاء الكادر التعليمي';
 		$this->render_crud();
 	}
 
-    function insert_admin_user_callback($post_array) {
-        $this->load->library('encrypt');
-        $key = 'super-secret-key';
-        $post_array['password'] = $this->encrypt->encode($post_array['password'], $key);
-
-        return $post_array;
+    function add_hint($value = '', $primary_key = null)
+    {
+        return '<input id="field-name" class="form-control" value="'.$value.
+            '" name="username" type="text" value="manager" maxlength="20" REQUIRED><br/>'.
+            '<span class="text-red"> *الرجاء كتابة مسمى تسجيل الدخول باللغة الإنجلينزية فقط.</span>';
     }
 
     // Create Admin User
@@ -131,24 +131,20 @@ class Panel extends Admin_Controller {
             ->display_as('description', 'الوصف')
             ->display_as('permissions', 'الصلاحيات');
         $crud->set_rules('name','الإسم','is_not_arabic_text');
-        $crud->callback_field('name',array($this,'add_hint'));
-        $crud->required_fields(array('name','description'));
+
+        // no need to edit these fields
+        $crud->callback_field('name',array($this,'name_readonly'));
+        $crud->callback_field('description',array($this,'description_readonly'));
+
         $this->render_crud();
     }
 
-    function add_hint($value = '', $primary_key = null)
-    {
-        return '<input id="field-name" class="form-control" value="'.$value
-            .'" name="name" type="text" value="manager" maxlength="20" REQUIRED> *الرجاء كتابة الإسم باللغة الإنجلينزية فقط.';
+    function name_readonly($value = '', $primary_key = null) {
+        return $value.'<input id="field-name" value="'.$value .'" name="name" type="hidden">';
     }
 
-    // Admin User Permission CRUD
-    public function admin_permission()
-    {
-        $this->verify_page();
-        $crud = $this->generate_crud('admin_permissions');
-        $this->mPageTitle = 'Admin Permissions';
-        $this->render_crud();
+    function description_readonly($value = '', $primary_key = null) {
+        return $value.'<input id="field-name" value="'.$value .'" name="description" type="hidden">';
     }
 
 	// Admin User Reset password
@@ -156,32 +152,36 @@ class Panel extends Admin_Controller {
 	{
 		// only top-level users can reset Admin User passwords
 		$this->verify_page(array('webmaster'));
+		if($user_id == null || $user_id == '')
+            redirect(base_url('admin').'/panel/admin_users');
+		else {
 
-		$form = $this->form_builder->create_form();
-		if ($form->validate())
-		{
-			// pass validation
-			$data = array('password' => $this->input->post('new_password'));
-			if ($this->ion_auth->update($user_id, $data))
-			{
-				$messages = $this->ion_auth->messages();
-				$this->system_message->set_success($messages);
-			}
-			else
-			{
-				$errors = $this->ion_auth->errors();
-				$this->system_message->set_error($errors);
-			}
-			refresh();
-		}
+            $form = $this->form_builder->create_form();
+            if ($form->validate()) {
+                // pass validation
+                $data = array('password' => $this->input->post('new_password'));
+                if ($this->ion_auth->update($user_id, $data)) {
+                    $messages = $this->ion_auth->messages();
+                    $this->system_message->set_success($messages);
+                } else {
+                    $errors = $this->ion_auth->errors();
+                    $this->system_message->set_error($errors);
+                }
+                refresh();
+            }
 
-		$this->load->model('admin_user_model', 'admin_users');
-		$target = $this->admin_users->get($user_id);
-		$this->mViewData['target'] = $target;
+            $this->load->model('admin_user_model', 'admin_users');
+            $target = $this->admin_users->get($user_id);
+            $this->mViewData['target'] = $target;
 
-		$this->mViewData['form'] = $form;
-		$this->mPageTitle = 'Reset Admin User Password';
-		$this->render('panel/admin_user_reset_password');
+            $this->mViewData['form'] = $form;
+
+            $this->mPageTitle = 'إعادة تعيين كلمة المرور';
+            $this->mPageTitleSmall = "جميع الأعضاء";
+            $this->push_breadcrumb('جميع الأعضاء','panel/admin_users');
+
+            $this->render('panel/admin_user_reset_password');
+        }
 	}
 
 	// Account Settings
@@ -197,7 +197,7 @@ class Panel extends Admin_Controller {
 		$form1->set_rule_group('panel/account_change_password');
 		$this->mViewData['form2'] = $form2;
 
-		$this->mPageTitle = "Account Settings";
+		$this->mPageTitle = "إعدادات الحساب";
 		$this->render('panel/account');
 	}
 

@@ -27,10 +27,11 @@
 					<?php foreach ($parent_params['children'] as $name => $url): ?>
 						<?php if ( empty($page_auth[$url]) || $this->ion_auth->in_group($page_auth[$url]) ): ?>
 						<?php
-							if ($multilingual)
-							  	$child_active = starts_with($current_uri, $language.'/'.$url);
-							else
-							  $child_active = starts_with($current_uri, $url);
+                            $child_active = starts_with($current_uri, $language.'/'.$url) || starts_with($current_uri, $url);
+//							if ($multilingual)
+//							  	$child_active = starts_with($current_uri, $language.'/'.$url);
+//							else
+//							  $child_active = starts_with($current_uri, $url);
 						?>
 						<li class='<?php if ($child_active) echo 'active'; ?>'>
 							<a href='<?php echo $url; ?>'><i class='fa fa-circle-o'></i> <?php echo $name; ?></a>

@@ -27,10 +27,12 @@ class User extends Admin_Controller {
         parent::__construct();
         $this->load->library('form_builder');
         $this->form = $this->form_builder->create_form();
+        $this->mPageTitleSmall = 'الطلاب';
+        $this->push_breadcrumb($this->mPageTitleSmall);
     }
 
     // Frontend User CRUD
-    public function index()
+    public function records()
     {
         $crud = $this->generate_crud('users','بيانات الطالب');
         $crud->columns('name', 'mobile', 'level_id');
@@ -59,7 +61,7 @@ class User extends Admin_Controller {
             $crud->unset_delete();
         }
 
-        $this->mPageTitle = 'Users';
+        $this->mPageTitle = 'القائمة';
         $this->add_stylesheet('assets/dist/admin/rtl/crud-rtl.css');
         $this->render_crud();
     }
@@ -172,25 +174,53 @@ class User extends Admin_Controller {
         // create form variable
         $this->mViewData['form'] = $this->form;
         // pass data to the view
-        $this->mPageTitle = "تسجيل حضور الطلاب";
-        $this->mViewData["page_title_small"] = "الصف الأول";
+        $this->mPageTitle = "تسجيل الحضور";
 
         if ($sectionId == '' || $sectionId == null)
         {
-            $this->mViewData["classes"] = $this->sections->select('id, title')->as_array()->get_all();
+            if (!$this->verify_page(false,'user/previous_days_attendance') &&
+                !$this->verify_page(false,'user/any_day_attendance')) {
+
+                $this->load->model('Admin_users_sections_model', 'teacher_sections');
+                $userId = $this->ion_auth->user()->row()->id;
+                $teacherSections = $this->teacher_sections->select('section_id')->as_array()->get_many_by('admin_user_id', $userId);
+                foreach ($teacherSections as $section)
+                    $this->mViewData["sections"][] =
+                        $this->sections->select('id, title')->as_array()->get($section['section_id']);
+            }
+            else
+                $this->mViewData["sections"] = $this->sections->select('id, title')->as_array()->get_all();
+
             //render
-            $this->render('user/classes');
+            $this->render('user/attendance_sections');
         }
-        else if (!$this->isValidDate($sectionId,date("Y-m-d")) && $this->ion_auth->in_group(array('staff','teacher'))) {
+        // Not valid section OR ( not valid teacher AND don't has permissions )
+        else if (!$this->isValidSection($sectionId) || (
+            !$this->isValidTeacher($sectionId) &&
+            !$this->verify_page(false,'user/previous_days_attendance') &&
+            !$this->verify_page(false,'user/any_day_attendance'))) {
+
+            $this->render('user/attendance_wrong_section');
+        }
+        // Not valid date AND don't has permissions
+        else if (!$this->isValidDate($sectionId,date("Y-m-d")) &&
+            !$this->verify_page(false,'user/previous_days_attendance') &&
+            !$this->verify_page(false,'user/any_day_attendance')) {
+
             $dateInfo = $this->getDateInformation($sectionId);
             $this->mViewData["dates"] = $dateInfo["dates"];
             $this->mViewData["startDate"] = $dateInfo["start_date"];
             $this->mViewData["endDate"] = $dateInfo["end_date"];
-            $this->render('user/wrong_date');
+            $this->render('user/attendance_wrong_date');
         }
         else {
+            $this->mPageTitle = $this->sections->select('title')->get($sectionId)->title;
+            $this->mPageTitleSmall = "تسجيل الحضور";
+            $this->push_breadcrumb('تسجيل الحضور','user/attendance');
+
             $this->mViewData["datePicker"] =
-                $this->ion_auth->in_group(array('webmaster','admin','manager','staff')) ? true : false;
+                $this->verify_page(false,'user/previous_days_attendance') ||
+                $this->verify_page(false,'user/any_day_attendance');
 
             if ($this->mViewData["datePicker"]){
                 $dateInfo =  $this->getDateInformation($sectionId);
@@ -199,7 +229,7 @@ class User extends Admin_Controller {
                 $this->mViewData["daysOfWeekDisabled"] = '';
                 $this->mViewData["daysOfWeekHighlighted"] = implode(',',$dateInfo["datesOfWeek"]);
 
-                if ($this->ion_auth->in_group(array('staff'))) {
+                if (!$this->verify_page(false,'user/any_day_attendance')) {
                     $this->mViewData["daysOfWeekDisabled"] = implode(',',
                         array_diff([0,1,2,3,4,5,6],$dateInfo["datesOfWeek"]));
                 }
@@ -283,6 +313,26 @@ class User extends Admin_Controller {
         }
     }
 
+    private function isValidSection($sectionId) {
+        $this->db->select('subjects.title as title');
+        $this->db->from('semesters');
+        $this->db->join('subjects', 'semesters.id = subjects.semester_id');
+        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
+        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
+        $this->db->join('sections', 'classes.id = sections.class_id');
+        $this->db->where('sections.id',$sectionId);
+        $result = $this->db->get()->num_rows();
+        return $result == 1;
+    }
+
+    private function isValidTeacher($sectionId) {
+        $userId = $this->ion_auth->user()->row()->id;
+        return $this->db->select('*')
+            ->from('admin_users_sections')
+            ->where('section_id',$sectionId)
+            ->where('admin_user_id',$userId)->get()->num_rows() == 1;
+    }
+
     /**
      * @param $sectionId
      * @param $day
@@ -295,7 +345,7 @@ class User extends Admin_Controller {
         $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
         $this->db->join('classes', 'classes.id = classes_subjects.class_id');
         $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->where('classes_subjects.class_id',$sectionId);
+        $this->db->where('sections.id',$sectionId);
         $this->db->where("start_date <=",$day);
         $this->db->where("end_date >=",$day);
         $this->db->like('subjects.dates',date("D",strtotime($day)));
@@ -310,11 +360,18 @@ class User extends Admin_Controller {
         $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
         $this->db->join('classes', 'classes.id = classes_subjects.class_id');
         $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->where('classes_subjects.class_id',$sectionId);
-        $result = $this->db->get()->result_array()[0];
-        $days = explode(',',$result['dates']);
-        $result['datesOfWeek'] = array_map(function($d){return date( "w", strtotime($d));},$days);
-        $result['dates'] = array_map(function($d){return isset($this->days[$d]) ? $this->days[$d] : "";},$days);
+        $this->db->where('sections.id',$sectionId);
+        $result = $this->db->get()->result_array();
+        if (count($result) > 0) {
+            $result = $result[0];
+            $days = explode(',', $result['dates']);
+            $result['datesOfWeek'] = array_map(function ($d) {
+                return date("w", strtotime($d));
+            }, $days);
+            $result['dates'] = array_map(function ($d) {
+                return isset($this->days[$d]) ? $this->days[$d] : "";
+            }, $days);
+        }
         return $result;
     }
 

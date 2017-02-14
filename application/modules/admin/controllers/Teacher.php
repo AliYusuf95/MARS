@@ -14,9 +14,10 @@ class Teacher extends Admin_Controller
         parent::__construct();
         // Set Page small title
         $this->mPageTitleSmall = 'المدرسين';
+        $this->push_breadcrumb($this->mPageTitleSmall);
     }
 
-    public function index()
+    public function records()
     {
         // Setup crud
         $crud = $this->generate_crud('admin_users', 'مدرس');

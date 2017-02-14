@@ -10,6 +10,7 @@ class General extends Admin_Controller {
 
         // Set Page small title
         $this->mPageTitleSmall = 'إعدادات عامة';
+        $this->push_breadcrumb($this->mPageTitleSmall);
     }
 
     public function terms()

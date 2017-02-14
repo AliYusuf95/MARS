@@ -18,6 +18,7 @@ class Staff_Crew extends Admin_Controller
         parent::__construct();
         // Set Page small title
         $this->mPageTitleSmall = 'الهيئة التعليمية';
+        $this->push_breadcrumb($this->mPageTitleSmall);
         $this->load->library('form_builder');
         $this->form = $this->form_builder->create_form();
     }

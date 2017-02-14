@@ -127,7 +127,7 @@ $config['ci_bootstrap'] = array(
             'url'         => 'teacher',
             'icon'        => 'fa fa-graduation-cap',
             'children'  => array(
-                'القائمة'               => 'teacher',
+                'القائمة'               => 'teacher/records',
                 'الحضور'                => 'teacher/attendance',
                 'الصفوف'                => 'teacher/section',
             )
@@ -137,10 +137,10 @@ $config['ci_bootstrap'] = array(
             'url'         => 'user',
             'icon'        => 'fa fa-user',
             'children'  => array(
-                'القائمة'           => 'user',
+                'القائمة'           => 'user/records',
                 'Create'            => 'user/create',
                 'User Groups'       => 'user/group',
-                'الحضور'            => 'user/attendance',
+                'تسجيل الحضور'            => 'user/attendance',
             )
         ),
         'panel' => array(
@@ -148,6 +148,7 @@ $config['ci_bootstrap'] = array(
             'url'         => 'panel',
             'icon'        => 'fa fa-cog',
             'children'  => array(
+                'إعدادات الحساب'            => 'panel/account',
                 'جميع الأعضاء'            => 'panel/admin_users',
                 'إضافة عضو'        => 'panel/admin_user_create',
                 'المجموعات'        => 'panel/groups',
