@@ -51,6 +51,9 @@
         // general fields to hide from CRUD
         'pos', 'created_at', 'updated_at', 'activated_at',
     );
+
+    $config['grocery_crud_default_date_format']	 = 'Y-M-d';
+    $config['grocery_crud_default_datetime_format'] = 'Y/m/d - h:i A';
     
     // common fields to "display as"
     $config['grocery_crud_display_as'] = array(

@@ -71,7 +71,7 @@
                         <tfoot>
                             <tr>
                                 <th colspan="3">مجموع الحضور</th>
-                                <th><?php echo count($users) ?></th>
+                                <th id="count">0</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -96,8 +96,11 @@
             radioClass: 'iradio_flat-grey'
         });
 
+        $('#count').text($('input[type="checkbox"]:checked').length);
+
         $('form input[type="checkbox"]').on('ifChanged', function(event){
-            console.log($(this).is(":checked"));
+            console.log();
+            $('#count').text($('input[type="checkbox"]:checked').length);
         });
 
         $.extend($.expr[':'], {

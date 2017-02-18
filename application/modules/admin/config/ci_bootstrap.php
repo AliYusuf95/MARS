@@ -129,7 +129,7 @@ $config['ci_bootstrap'] = array(
             'children'  => array(
                 'القائمة'               => 'teacher/records',
                 'الحضور'                => 'teacher/attendance',
-                'الصفوف'                => 'teacher/section',
+                'مدرسي الصفوف'                => 'teacher/section_teacher',
             )
         ),
         'user' => array(
@@ -138,8 +138,9 @@ $config['ci_bootstrap'] = array(
             'icon'        => 'fa fa-user',
             'children'  => array(
                 'القائمة'           => 'user/records',
-                'Create'            => 'user/create',
-                'User Groups'       => 'user/group',
+                'طلبات التسجيل'           => 'user/requests',
+                //'إضافة طالب'            => 'user/create',
+                'المجموعات'       => 'user/group',
                 'تسجيل الحضور'            => 'user/attendance',
             )
         ),

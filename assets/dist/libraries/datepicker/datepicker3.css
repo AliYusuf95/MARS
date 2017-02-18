@@ -6,11 +6,13 @@
  * Licensed under the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
 /** RTL fix **/
+.datepicker {
+  width: 230px;
+}
 .datepicker table {
   width: initial;
   max-width: initial;
 }
-
 .datepicker.dropdown-menu {
   right: initial;
   left: initial;

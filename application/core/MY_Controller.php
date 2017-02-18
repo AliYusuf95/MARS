@@ -5,7 +5,17 @@
  * 	- MY_Controller: for Frontend Website
  * 	- Admin_Controller: for Admin Panel (require login), extends from MY_Controller
  * 	- API_Controller: for API Site, extends from REST_Controller
+ *  @property MX_Config config
+ *  @property MY_Router router
+ *  @property CI_URI uri
+ *  @property MY_Lang lang
+ *  @property CI_Output output
+ *  @property CI_DB_query_builder db
  *  @property Ion_auth_model|Ion_auth ion_auth
+ *  @property MY_Form_validation form_validation
+ *  @property Form_builder form_builder
+ *  @property System_message system_message
+ *  @property CI_Input input
  */
 class MY_Controller extends MX_Controller {
 	
@@ -42,6 +52,7 @@ class MY_Controller extends MX_Controller {
 
 	// Login user
 	protected $mPageAuth = array();
+	/** @var object $mUser*/
 	protected $mUser = NULL;
 	protected $mUserGroups = array();
 	protected $mUserMainGroup;
@@ -53,8 +64,8 @@ class MY_Controller extends MX_Controller {
 
 		// router info
 		$this->mModule = $this->router->fetch_module();
-		$this->mCtrler = $this->router->fetch_class();
-		$this->mAction = $this->router->fetch_method();
+		$this->mCtrler = $this->router->class;
+		$this->mAction = $this->router->method;
 		$this->mMethod = $this->input->server('REQUEST_METHOD');
 		
 		// initial setup

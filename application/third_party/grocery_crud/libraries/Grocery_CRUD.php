@@ -280,9 +280,11 @@ class grocery_CRUD_Field_Types
 			case 'date':
 				if(!empty($value) && $value != '0000-00-00' && $value != '1970-01-01')
 				{
+                    $ci = &get_instance();
+                    $format = $ci->config->item('grocery_crud_default_date_format');
 					list($year,$month,$day) = explode("-",$value);
-
-					$value = date($this->php_date_format, mktime (0, 0, 0, (int)$month , (int)$day , (int)$year));
+                    $value = date ($format, mktime (0,0,0,(int)$month , (int)$day , (int)$year));
+					//$value = date($this->php_date_format, mktime (0, 0, 0, (int)$month , (int)$day , (int)$year));
 				}
 				else
 				{
@@ -292,10 +294,12 @@ class grocery_CRUD_Field_Types
 			case 'datetime':
 				if(!empty($value) && $value != '0000-00-00 00:00:00' && $value != '1970-01-01 00:00:00')
 				{
+                    $ci = &get_instance();
+                    $format = $ci->config->item('grocery_crud_default_datetime_format');
 					list($year,$month,$day) = explode("-",$value);
 					list($hours,$minutes) = explode(":",substr($value,11));
-
-					$value = date($this->php_date_format." - H:i", mktime ((int)$hours , (int)$minutes , 0, (int)$month , (int)$day ,(int)$year));
+                    $value = date ($format, mktime ( (int)$hours , (int)$minutes ,0, (int)$month , (int)$day ,(int)$year));
+					//$value = date($this->php_date_format." - H:i", mktime ((int)$hours , (int)$minutes , 0, (int)$month , (int)$day ,(int)$year));
 				}
 				else
 				{
@@ -1749,15 +1753,17 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 	protected function _print_webpage($data)
 	{
-		$string_to_print = "<html lang=\"en\"><head><meta charset=\"utf-8\" /><style type=\"text/css\" >
-        body { direction: rtl; }
+		$string_to_print = "<!DOCTYPE html><html moznomarginboxes lang=\"en\"><head><meta charset=\"utf-8\" /><style type=\"text/css\" >
+        @page {size: auto; margin: 0;}
+        html {background-color: #FFFFFF;margin: 0;}
+        body {direction: rtl;margin: 10mm 15mm 10mm 15mm;}
 		#print-table{ color: #000; background: #fff; font-size: 13px;}
 		#print-table table tr td, #print-table table tr th{ border: 1px solid black; border-bottom: none; border-right: none; padding: 4px 8px 4px 4px}
 		#print-table table{ border-bottom: 1px solid black; border-right: 1px solid black}
 		#print-table table tr th{background: #ddd !important}
 		#print-table table tr:nth-child(odd){background: #eee !important}
 		@media print {
-		body {-webkit-print-color-adjust: exact;}
+		body {mso-print-color: yes; -webkit-print-color-adjust: exact;}
 		#print-table table tr th{background: #ddd !important;} 
 		#print-table table tr:nth-child(odd){background: #eee !important;}
 		}
@@ -3677,7 +3683,7 @@ class Grocery_CRUD extends grocery_CRUD_States
 	 * @access	public
 	 * @param	string
 	 * @param	array
-	 * @return	void
+	 * @return	Grocery_CRUD
 	 */
 	public function columns()
 	{
@@ -3702,7 +3708,7 @@ class Grocery_CRUD extends grocery_CRUD_States
 	 * @access	public
 	 * @param	mixed
 	 * @param	string
-	 * @return	void
+	 * @return	Grocery_CRUD
 	 */
 	function set_rules($field, $label = '', $rules = '')
 	{

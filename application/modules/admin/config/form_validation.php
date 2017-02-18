@@ -130,27 +130,32 @@ $config = array(
 	// Admin User Update Info
 	'panel/account_update_info' => array(
 		array(
-			'field'		=> 'username',
-			'label'		=> 'Username',
-			'rules'		=> 'required',
+			'field'		=> 'name',
+			'label'		=> 'الإسم',
+			'rules'		=> 'trim|required|is_arabic_text',
 		),
 		array(
-			'field'		=> 'password',
-			'label'		=> 'Password',
-			'rules'		=> 'required',
+			'field'		=> 'mobile',
+			'label'		=> 'رقم الهاتف',
+			'rules'		=> 'trim|required|exact_length[8]|is_number',
 		),
+        array(
+            'field'		=> 'email',
+            'label'		=> 'البريد الإلكتروني',
+            'rules'		=> 'trim|required|valid_email|is_unique[users.email]',
+        ),
 	),
 
 	// Admin User Change Password
 	'panel/account_change_password' => array(
         array(
             'field'		=> 'new_password',
-            'label'		=> 'New Password',
-            'rules'		=> 'required',
+            'label'		=> 'كلمة المرور الجديدة',
+            'rules'		=> 'required|min_length[6]',
         ),
         array(
             'field'		=> 'retype_password',
-            'label'		=> 'Retype Password',
+            'label'		=> 'تأكيد كلمة المرور الجديدة',
             'rules'		=> 'required|matches[new_password]',
         ),
     ),
@@ -169,6 +174,14 @@ $config = array(
     ),
 
     'user/attendance' => array(
+        array(
+            'field'		=> 'date',
+            'label'		=> 'التاريخ',
+            'rules'		=> 'required',
+        )
+    ),
+
+    'teacher/attendance' => array(
         array(
             'field'		=> 'date',
             'label'		=> 'التاريخ',

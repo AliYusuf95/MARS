@@ -2,12 +2,15 @@
 
 /**
  * Base Controller for Admin module
+ * @property Admin_permission_model permission
+ * @property Admin_groups_permission_model groups_permission
  */
 class Admin_Controller extends MY_Controller {
 
 	protected $mUsefulLinks = array();
 
 	// Grocery CRUD or Image CRUD
+    /** @var Grocery_CRUD $mCrud */
 	protected $mCrud;
 	protected $mCrudUnsetFields;
 
@@ -45,7 +48,6 @@ class Admin_Controller extends MY_Controller {
         }
         return TRUE;
     }
-
 
     // Render template (override parent)
 	protected function render($view_file, $layout = 'default')
@@ -120,7 +122,13 @@ class Admin_Controller extends MY_Controller {
 		}
 	}
 
-	public function callback_color_picker($value = '', $primary_key = NULL, $field = NULL)
+    /**
+     * @param string $value
+     * @param string $primary_key
+     * @param object $field
+     * @return string
+     */
+    public function callback_color_picker($value = '', $primary_key = NULL, $field = NULL)
 	{
 		$name = $field->name;
 		return "<input type='color' name='$name' value='$value' style='width:80px' />";

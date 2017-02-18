@@ -46,7 +46,8 @@ class Registration extends MY_Controller {
                         'name' => $this->input->post('name'),
                         'mobile' => $this->numbers_a2e($this->input->post('mobile')),
                         'email' => $this->input->post('email'),
-                        'level_id' => $this->input->post('ed_level')
+                        'level_id' => $this->input->post('ed_level'),
+                        'level_year' => date('Y')
                     ));
                     $this->system_message->set_success("تم التسجيل بنجاح");
                 } else {

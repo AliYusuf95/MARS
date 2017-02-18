@@ -1392,7 +1392,7 @@ class Ion_auth_model extends CI_Model
 	/**
 	 * get_users_groups
 	 *
-	 * @return array
+	 * @return CI_DB_result
 	 * @author Ben Edmunds
 	 **/
 	public function get_users_groups($id=FALSE)
@@ -2094,7 +2094,7 @@ class Ion_auth_model extends CI_Model
 	 *
 	 * Get the messages
 	 *
-	 * @return void
+	 * @return string
 	 * @author Ben Edmunds
 	 **/
 	public function messages()
@@ -2172,7 +2172,7 @@ class Ion_auth_model extends CI_Model
 	 *
 	 * Get the error message
 	 *
-	 * @return void
+	 * @return string
 	 * @author Ben Edmunds
 	 **/
 	public function errors()

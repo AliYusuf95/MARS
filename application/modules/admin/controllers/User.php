@@ -66,8 +66,40 @@ class User extends Admin_Controller {
         $this->render_crud();
     }
 
+    // Frontend User CRUD
+    public function requests()
+    {
+        $crud = $this->generate_crud('users','بيانات الطالب');
+        $crud->columns('name', 'mobile', 'cpr', 'level_id', 'created_at')
+            ->fields('name', 'mobile', 'cpr', 'email', 'level_id', 'active')
+            ->set_read_fields('name', 'mobile', 'cpr', 'email', 'level_id', 'active', 'created_at')
+            ->where('users.active',0);
+
+        $crud->display_as('name','الإسم')
+            ->display_as('mobile','الهاتف')
+            ->display_as('email','البريد الإلكتروني')
+            ->display_as('active','الحالة')
+            ->display_as('cpr','الرقم الشخصي')
+            ->display_as('created_at','تاريخ التسجيل')
+            ->display_as('level_id','المستوى الدراسي');
+
+        $crud->set_relation('level_id','levels','title',null,'id');
+
+        $crud->set_rules('level_year','عام المستوى الدراسي','numeric');
+
+        // only webmaster and admin can reset user password
+        if ($this->verify_page(false,'user/reset_password'))
+        {
+            $crud->add_action('Reset Password', '', 'admin/user/reset_password', 'fa fa-repeat');
+        }
+
+        $this->mPageTitle = 'القائمة';
+        $this->add_stylesheet('assets/dist/admin/rtl/crud-rtl.css');
+        $this->render_crud();
+    }
+
     // Create Frontend User
-    public function create()
+    /*public function create()
     {
 
         if ($this->form->validate())
@@ -118,13 +150,17 @@ class User extends Admin_Controller {
 
         $this->mViewData['form'] = $this->form;
         $this->render('user/create');
-    }
+    }*/
 
     // User Groups CRUD
     public function group()
     {
-        $crud = $this->generate_crud('groups');
-        $this->mPageTitle = 'User Groups';
+        $crud = $this->generate_crud('groups', 'مجموعة');
+
+        $crud->display_as('name','الإسم')
+            ->display_as('description','الوصف');
+
+        $this->mPageTitle = 'المجموعات';
         $this->render_crud();
     }
 
@@ -182,7 +218,7 @@ class User extends Admin_Controller {
                 !$this->verify_page(false,'user/any_day_attendance')) {
 
                 $this->load->model('Admin_users_sections_model', 'teacher_sections');
-                $userId = $this->ion_auth->user()->row()->id;
+                $userId = $this->mUser->id;
                 $teacherSections = $this->teacher_sections->select('section_id')->as_array()->get_many_by('admin_user_id', $userId);
                 foreach ($teacherSections as $section)
                     $this->mViewData["sections"][] =
@@ -275,7 +311,7 @@ class User extends Admin_Controller {
                                 'user_id' => $idList[$i],
                                 'date' => $date,
                                 'status' => false,
-                                'admin_user_id' => $this->ion_auth->user()->row()->id
+                                'by_admin_user_id' => $this->mUser->id
                             );
                             $this->db->insert('users_attendance', $users_attendance);
                         }
@@ -284,7 +320,7 @@ class User extends Admin_Controller {
                     for ($i=0 ; $i < count($idList) ; $i++) {
                         $user_attendance = array(
                             'status' => isset($attendanceList[$idList[$i]]) ? true : false,
-                            'admin_user_id' => $this->ion_auth->user()->row()->id
+                            'by_admin_user_id' => $this->mUser->id
                         );
                         $this->db->update('users_attendance', $user_attendance,
                             array('user_id'=>$idList[$i],'date'=>$date));
@@ -326,7 +362,7 @@ class User extends Admin_Controller {
     }
 
     private function isValidTeacher($sectionId) {
-        $userId = $this->ion_auth->user()->row()->id;
+        $userId = $this->mUser->id;
         return $this->db->select('*')
             ->from('admin_users_sections')
             ->where('section_id',$sectionId)
