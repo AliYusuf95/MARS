@@ -1,6 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * @property Ion_auth_model ion_auth_model
+ * @property User_model users
+ * @property Admin_users_sections_model teacher_sections
+ * @property Section_model sections
+ * @property Subject_model subjects
+ */
 class User extends Admin_Controller {
 
     /**
@@ -10,7 +17,8 @@ class User extends Admin_Controller {
     public $autoload = array(
         'model' => array('User_model' => 'users',
             'Class_model' => 'classes',
-            'Section_model' => 'sections')
+            'Section_model' => 'sections',
+            'Subject_model' => 'subjects',)
     );
     private $days = array(
         'Sun' => 'الأحد',
@@ -206,40 +214,88 @@ class User extends Admin_Controller {
         $this->render('user/reset_password');
     }
 
-    public function attendance($sectionId = null){
+    public function attendance($sectionId = '', $subjectId = ''){
         // create form variable
         $this->mViewData['form'] = $this->form;
         // pass data to the view
         $this->mPageTitle = "تسجيل الحضور";
 
-        if ($sectionId == '' || $sectionId == null)
+        if ($this->input->server('REQUEST_METHOD') == 'POST') {
+            if ($this->form->validate()) {
+                $date = $this->input->post('date');
+                $section_id = $this->input->post('section');
+                $subject_id = $this->input->post('subject');
+                $idList = $this->input->post('id');
+                $attendanceList = $this->input->post('attendance');
+
+                // get attendance list od date if exist
+                $updateList = $this->getStudentsAttendance($section_id, $subject_id, $date);
+
+                // try to insert or update
+                for ($i=0 ; $i < count($idList) ; $i++) {
+                    $update = false; // update flag
+                    // check if it's need to update
+                    for ($j=0 ; $j < count($updateList) ; $j++) {
+                        if ($idList[$i] == $updateList[$j]['user_id']) {
+                            $user_attendance = array(
+                                'status' => isset($attendanceList[$idList[$i]]) ? true : false,
+                                'by_admin_user_id' => $this->mUser->id
+                            );
+                            $this->db->update('users_attendance', $user_attendance,
+                                array('user_id' => $idList[$i],
+                                    'section_id' => $section_id,
+                                    'subject_id' => $subject_id,
+                                    'date' => $date));
+                            $update = true; // change update flag
+                            break;
+                        }
+                    }
+                    // otherwise inset new record
+                    if (!$update){
+                        $users_attendance = array(
+                            'user_id' => $idList[$i],
+                            'date' => $date,
+                            'section_id' => $section_id,
+                            'subject_id' => $subject_id,
+                            'status' => isset($attendanceList[$idList[$i]]) ? true : false,
+                            'by_admin_user_id' => $this->mUser->id
+                        );
+                        $this->db->insert('users_attendance', $users_attendance);
+                    }
+                }
+
+                $this->system_message->set_success("تم الحفظ بنجاح");
+                refresh();
+            } else {
+                $this->system_message->set_error("حدث خطأ، يرجى المحاولة مرة أخرى.");
+                refresh();
+            }
+        }
+
+        if ($sectionId == '' || $subjectId == '')
         {
             if (!$this->verify_page(false,'user/previous_days_attendance') &&
                 !$this->verify_page(false,'user/any_day_attendance')) {
 
-                $this->load->model('Admin_users_sections_model', 'teacher_sections');
-                $userId = $this->mUser->id;
-                $teacherSections = $this->teacher_sections->select('section_id')->as_array()->get_many_by('admin_user_id', $userId);
-                foreach ($teacherSections as $section)
-                    $this->mViewData["sections"][] =
-                        $this->sections->select('id, title')->as_array()->get($section['section_id']);
+                $this->mViewData["sections"] = $this->getTeacherSections($this->mUser->id);
+
             }
             else
-                $this->mViewData["sections"] = $this->sections->select('id, title')->as_array()->get_all();
+                $this->mViewData["sections"] = $this->getAllSections();
 
             //render
             $this->render('user/attendance_sections');
         }
         // Not valid section OR ( not valid teacher AND don't has permissions )
-        else if (!$this->isValidSection($sectionId) || (
-            !$this->isValidTeacher($sectionId) &&
+        else if (!$this->isValidSection($sectionId, $subjectId) || (
+            !$this->isValidTeacher($sectionId,$subjectId) &&
             !$this->verify_page(false,'user/previous_days_attendance') &&
             !$this->verify_page(false,'user/any_day_attendance'))) {
 
             $this->render('user/attendance_wrong_section');
         }
         // Not valid date AND don't has permissions
-        else if (!$this->isValidDate($sectionId,date("Y-m-d")) &&
+        else if (!$this->isValidDate($subjectId,date("Y-m-d")) &&
             !$this->verify_page(false,'user/previous_days_attendance') &&
             !$this->verify_page(false,'user/any_day_attendance')) {
 
@@ -250,7 +306,8 @@ class User extends Admin_Controller {
             $this->render('user/attendance_wrong_date');
         }
         else {
-            $this->mPageTitle = $this->sections->select('title')->get($sectionId)->title;
+            $this->mPageTitle = $this->sections->select('title')->get($sectionId)->title
+                .' - '.$this->subjects->select('title')->get($subjectId)->title;
             $this->mPageTitleSmall = "تسجيل الحضور";
             $this->push_breadcrumb('تسجيل الحضور','user/attendance');
 
@@ -259,7 +316,7 @@ class User extends Admin_Controller {
                 $this->verify_page(false,'user/any_day_attendance');
 
             if ($this->mViewData["datePicker"]){
-                $dateInfo =  $this->getDateInformation($sectionId);
+                $dateInfo = $this->getDateInformation($sectionId);
                 $this->mViewData["startDate"] = $dateInfo["start_date"];
                 $this->mViewData["endDate"] = $dateInfo["end_date"];
                 $this->mViewData["daysOfWeekDisabled"] = '';
@@ -271,67 +328,10 @@ class User extends Admin_Controller {
                 }
             }
 
-            //daysOfWeekDisabled: "0,1,2,3,4,5,6",
-            //daysOfWeekHighlighted: "0,1"
-
-            $this->mViewData["dates"] = array(date("Y-m-d") => date("Y-m-d"));
-            $this->db->select('users.id as id, name, IFNULL(mobile,"-") as mobile');
-            $this->db->from('users');
-            $this->db->join('users_sections', 'users.id = users_sections.user_id');
-            $this->db->where('users_sections.section_id',$sectionId);
-            $this->db->order_by('name', 'ASC');
-            $query = $this->db->get()->result_array();
-
-            foreach ($query as &$user){
-                $this->db->select('users_attendance.`status`');
-                $this->db->from('users_attendance');
-                $this->db->where('user_id',$user["id"]);
-                $this->db->where('date',date("Y-m-d"));
-                $result = $this->db->get()->result_array();
-                $user['status'] = isset($result[0]['status']) ? $result[0]['status'] : false ;
-            }
-
-            $this->mViewData["users"] = $query;
-            if ($this->input->server('REQUEST_METHOD') == 'POST') {
-                if ($this->form->validate()) {
-                    $date = $this->input->post('date');
-                    $idList = $this->input->post('id');
-                    $attendanceList = $this->input->post('attendance');
-
-                    $this->db->select('*');
-                    $this->db->from('users');
-                    $this->db->join('users_sections', 'users.id = users_sections.user_id');
-                    $this->db->where('users_sections.section_id',$sectionId);
-                    $this->db->where('users_attendance.date',$date);
-                    $this->db->join('users_attendance', 'users.id = users_attendance.user_id');
-                    if ($this->db->get()->num_rows() == 0) {
-                        // set false fro all students
-                        for ($i = 0; $i < count($idList); $i++) {
-                            $users_attendance = array(
-                                'user_id' => $idList[$i],
-                                'date' => $date,
-                                'status' => false,
-                                'by_admin_user_id' => $this->mUser->id
-                            );
-                            $this->db->insert('users_attendance', $users_attendance);
-                        }
-                    }
-
-                    for ($i=0 ; $i < count($idList) ; $i++) {
-                        $user_attendance = array(
-                            'status' => isset($attendanceList[$idList[$i]]) ? true : false,
-                            'by_admin_user_id' => $this->mUser->id
-                        );
-                        $this->db->update('users_attendance', $user_attendance,
-                            array('user_id'=>$idList[$i],'date'=>$date));
-                    }
-                    $this->system_message->set_success("تم الحفظ بنجاح");
-                    refresh();
-                } else {
-                    $this->system_message->set_error("حدث خطأ، يرجى المحاولة مرة أخرى.");
-                    refresh();
-                }
-            }
+            $this->mViewData["date"] = date("Y-m-d");
+            $this->mViewData["sectionId"] = $sectionId;
+            $this->mViewData["subjectId"] = $subjectId;
+            $this->mViewData["users"] = $this->getSectionStudents($sectionId);
 
             // add iCheck plugin
             $this->add_stylesheet("assets/dist/libraries/iCheck/skins/flat/grey.css");
@@ -349,7 +349,7 @@ class User extends Admin_Controller {
         }
     }
 
-    private function isValidSection($sectionId) {
+    private function isValidSection($sectionId, $subjectId) {
         $this->db->select('subjects.title as title');
         $this->db->from('semesters');
         $this->db->join('subjects', 'semesters.id = subjects.semester_id');
@@ -357,31 +357,30 @@ class User extends Admin_Controller {
         $this->db->join('classes', 'classes.id = classes_subjects.class_id');
         $this->db->join('sections', 'classes.id = sections.class_id');
         $this->db->where('sections.id',$sectionId);
+        $this->db->where('subjects.id',$subjectId);
         $result = $this->db->get()->num_rows();
         return $result == 1;
     }
 
-    private function isValidTeacher($sectionId) {
+    private function isValidTeacher($sectionId, $subjectId) {
         $userId = $this->mUser->id;
-        return $this->db->select('*')
+        return $this->db->select()
             ->from('admin_users_sections')
             ->where('section_id',$sectionId)
+            ->where('subject_id',$subjectId)
             ->where('admin_user_id',$userId)->get()->num_rows() == 1;
     }
 
     /**
-     * @param $sectionId
+     * @param $subjectId
      * @param $day
      * @return bool
      */
-    private function isValidDate($sectionId, $day){
+    private function isValidDate($subjectId, $day){
         $this->db->select('subjects.dates, semesters.start_date as start_date, semesters.end_date as end_date');
         $this->db->from('semesters');
         $this->db->join('subjects', 'semesters.id = subjects.semester_id');
-        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
-        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
-        $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->where('sections.id',$sectionId);
+        $this->db->where('subjects.id',$subjectId);
         $this->db->where("start_date <=",$day);
         $this->db->where("end_date >=",$day);
         $this->db->like('subjects.dates',date("D",strtotime($day)));
@@ -409,6 +408,61 @@ class User extends Admin_Controller {
             }, $days);
         }
         return $result;
+    }
+
+    private function getAllSections()
+    {
+        return $this->db->select('sections.id as sectionId, sections.title as sectionTitle')
+            ->select('subjects.id as subjectId, subjects.title as subjectTitle')
+            ->from('admin_users_sections')
+            ->join('sections','admin_users_sections.section_id = sections.id')
+            ->join('subjects','admin_users_sections.subject_id = subjects.id')
+            ->join('classes_subjects','classes_subjects.subject_id = subjects.id')
+            ->get()->result_array();
+    }
+
+    private function getTeacherSections($id)
+    {
+        return $this->db->select('sections.id as sectionId, sections.title as sectionTitle')
+            ->select('subjects.id as subjectId, subjects.title as subjectTitle')
+            ->from('admin_users_sections')
+            ->join('sections','admin_users_sections.section_id = sections.id')
+            ->join('subjects','admin_users_sections.subject_id = subjects.id')
+            ->join('classes_subjects','classes_subjects.subject_id = subjects.id')
+            ->where('admin_user_id',$id)
+            ->get()->result_array();
+    }
+
+    private function getSectionStudents($sectionId)
+    {
+        $query = $this->db->select('users.id as id, name, IFNULL(mobile,"-") as mobile')
+            ->from('users')
+            ->join('users_sections', 'users.id = users_sections.user_id')
+            ->where('users_sections.section_id',$sectionId)
+            ->order_by('name', 'ASC')
+            ->get()->result_array();
+
+        foreach ($query as &$user){
+            $result = $this->db->select('users_attendance.`status`')
+                ->from('users_attendance')
+                ->where('user_id',$user["id"])
+                ->where('date',date("Y-m-d"))
+                ->get()->result_array();
+            $user['status'] = isset($result[0]['status']) ? $result[0]['status'] : false ;
+        }
+
+        return $query;
+    }
+
+    private function getStudentsAttendance($section_id, $subject_id, $date)
+    {
+        return $this->db->distinct()
+            ->select('user_id')
+            ->from('users_attendance')
+            ->where('section_id',$section_id)
+            ->where('subject_id',$subject_id)
+            ->where('date',$date)
+            ->get()->result_array();
     }
 
 }

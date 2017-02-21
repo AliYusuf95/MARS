@@ -119,6 +119,7 @@
                                 <th>#</th>
                                 <th class="col-xs-5">الإسم</th>
                                 <th class="col-xs-1">الفرقة</th>
+                                <th class="col-xs-1">المادة</th>
                                 <th class="col-xs-1">رقم الهاتف</th>
                                 <th class="col-xs-1">الحضور</th>
                                 <th class="col-xs-2">ملاحظات</th>
@@ -131,9 +132,11 @@
                                 <td><?php echo ++$counter; ?></td>
                                 <td><?php echo $user["name"]; ?></td>
                                 <td><?php echo $user["sectionTitle"]; ?></td>
+                                <td><?php echo $user["subjectTitle"]; ?></td>
                                 <td><?php echo $user["mobile"]; ?></td>
-                                <td><?php echo $form->field_checkbox("attendance[".$user["id"]."-".$user["sectionId"]."]", null, $user["status"]);
+                                <td><?php echo $form->field_checkbox("attendance[{$user["id"]}-{$user["sectionId"]}-{$user["subjectId"]}]", null, $user["status"]);
                                     echo $form->field_hidden("id[]",$user["id"]);
+                                    echo $form->field_hidden("subject[]",$user["subjectId"]);
                                     echo $form->field_hidden("section[]",$user["sectionId"]); ?></td>
                                 <td><?php echo $form->field_text('comment[]',$user["comment"]); ?></td>
                             </tr>
@@ -141,7 +144,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="4">مجموع الحضور</th>
+                                <th colspan="5">مجموع الحضور</th>
                                 <th colspan="2" id="count">0</th>
                             </tr>
                         </tfoot>
@@ -164,7 +167,7 @@
     <div class="col-xs-12">
         <div class="box">
             <div class="box-header">
-                <h3 class="box-title">إضافة مدرسين</h3>
+                <h3 class="box-title">إضافة مدرس</h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -173,6 +176,7 @@
                         <tr>
                             <th class="col-xs-6">المدرس</th>
                             <th class="col-xs-5">الفرقة</th>
+                            <th class="col-xs-5">المادة</th>
                             <th class="col-xs-1">إضافة</th>
                         </tr>
                     </thead>
@@ -192,6 +196,15 @@
                                     <select id="select-section" class="form-control select2" style="width: 100%;">
                                         <?php foreach ($availableSections as $section): ?>
                                             <?php echo "<option value='{$section['id']}'>{$section['title']}</option>" ?>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <select id="select-subject" class="form-control select2" style="width: 100%;">
+                                        <?php foreach ($availableSubjects as $subject): ?>
+                                            <?php echo "<option value='{$subject['id']}'>{$subject['title']}</option>" ?>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -232,25 +245,30 @@
 
         var $teacher = $("#select-teacher");
         var $section = $("#select-section");
+        var $subject = $("#select-subject");
         var $table = $("#students-table");
 
         $("#add-teacher").on('click', function (evt) {
             var id = $teacher.children("option").filter(":selected").val();
             var secId = $section.children("option").filter(":selected").val();
-            if($("#attendance\\\["+id+"-"+secId+"\\\]").length){
-                swal('عذراً','مدرس هذه الفرقة موجود بالفعل.','error');
+            var subId = $subject.children("option").filter(":selected").val();
+            if($("#attendance\\\["+id+"-"+secId+"-"+subId+"\\\]").length){
+                swal('عذراً','هذا المدرس موجود بالفعل.','error');
             } else {
                 var name = $teacher.children("option").filter(":selected").text();
                 var section = $section.children("option").filter(":selected").text();
+                var subject = $subject.children("option").filter(":selected").text();
                 var mobile = $teacher.children("option").filter(":selected").data("mobile");
                 var counter = parseInt($table.children("tr:last").children("td:first").text()) + 1;
                 var markup = "<tr style='background: rgba(0, 166, 90, 0.53); color: #fff;'><td>" + counter + "</td>" +
                     "<td>" + name + "</td>" +
                     "<td>" + section + "</td>" +
+                    "<td>" + subject + "</td>" +
                     "<td>" + mobile + "</td>" +
-                    "<td><input type='checkbox' name='attendance[" + id + "-" + secId + "]' id='attendance[" + id + "-" + secId + "]'/>" +
+                    "<td><input type='checkbox' name='attendance["+ id + "-" + secId + "-" + subId +"]' id='attendance["+ id + "-" + secId + "-" + subId +"]'/>" +
                     "<input type='hidden' name='id[]' value='"+id+"' />" +
                     "<input type='hidden' name='section[]' value='"+secId+"' />" +
+                    "<input type='hidden' name='subject[]' value='"+subId+"' />" +
                     "<td><input style='color: initial;' type='text' name='comment[]' value='' id='comment[]'/></td>" +
                     "</tr>";
                 var $row = $table.append(markup);
@@ -283,8 +301,8 @@
         //iCheck for checkbox and radio inputs
         var $iCheck = $('form input[type="checkbox"]');
         $iCheck.iCheck({
-            checkboxClass: 'icheckbox_flat-grey',
-            radioClass: 'iradio_flat-grey'
+            checkboxClass: 'icheckbox_flat',
+            radioClass: 'iradio_flat'
         });
 
         $('#count').text($('input[type="checkbox"]:checked').length);

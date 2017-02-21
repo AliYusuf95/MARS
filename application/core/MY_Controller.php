@@ -7,6 +7,7 @@
  * 	- API_Controller: for API Site, extends from REST_Controller
  *  @property MX_Config config
  *  @property MY_Router router
+ *  @property MY_Loader load
  *  @property CI_URI uri
  *  @property MY_Lang lang
  *  @property CI_Output output

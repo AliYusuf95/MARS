@@ -22,16 +22,27 @@ class MY_Form_validation extends CI_Form_validation {
     /**
      * Custom rules
      * @param $str String Column1 value
-     * @param $field String {Table Name}.{Column1 Name}.{Column2 Name}
+     * @param $field String {Table Name}.{Column1 Name}.{Column2 Name}....{Column[N] Name}
      * @return bool
      */
     public function compare_pk($str, $field)
     {
-        $field1 = $field2 = '';
-        sscanf($field, '%[^.].%[^.].%[^.]', $table,$field1,$field2);
-        return (isset($this->CI->db , $this->_field_data[$field2])) ?
-            ($this->CI->db->limit(1)->get_where($table,
-                    array($field1 => $str,$field2 => $this->_field_data[$field2]['postdata']))->num_rows() === 0)
+        $pattern = str_repeat('%[^.].',(substr_count($field, '.'))).'%[^.]';
+        pretty_var($field);
+        pretty_var($pattern);
+        $values = sscanf($field, $pattern);
+        if (!is_array($values) || count($values) < 2)
+            return FALSE;
+        pretty_var($values);
+        $where = array();
+        for ($i=1 ; $i<count($values) ; $i++) {
+            if (isset($this->_field_data[$values[$i]]))
+                $where[$values[$i]] = $this->_field_data[$values[$i]]['postdata'];
+            else
+                return FALSE;
+        }
+        return isset($this->CI->db) ?
+            ($this->CI->db->limit(1)->get_where($values[0],$where)->num_rows() === 0)
             : FALSE;
     }
 

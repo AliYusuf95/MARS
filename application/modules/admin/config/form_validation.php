@@ -178,6 +178,16 @@ $config = array(
             'field'		=> 'date',
             'label'		=> 'التاريخ',
             'rules'		=> 'required',
+        ),
+        array(
+            'field'		=> 'section',
+            'label'		=> 'الفرقة',
+            'rules'		=> 'required',
+        ),
+        array(
+            'field'		=> 'subject',
+            'label'		=> 'المادة',
+            'rules'		=> 'required',
         )
     ),
 

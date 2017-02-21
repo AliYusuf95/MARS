@@ -18,26 +18,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <?php /** @var Form $form */
                 echo $form->open(); ?>
                 <?php echo $form->messages(); ?>
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped table-hover">
                     <thead>
                     <tr>
-                        <th>#</th>
-                        <th class="col-xs-10">الصفوف</th>
+                        <th class="col-xs-2">#</th>
+                        <th class="col-xs-5">الصف</th>
+                        <th class="col-xs-5">المادة</th>
                     </tr>
                     </thead>
                     <tbody  id="students-table">
                     <?php $counter = 0 ; ?>
-                    <?php foreach ($sections as $class): ?>
-                        <tr>
+                    <?php foreach ($sections as $class):
+                        $url = current_url().'/'.$class["sectionId"].'/'.$class["subjectId"];
+                        ?>
+                        <tr style="cursor: pointer;" onclick="window.location.href='<?php echo $url; ?>';">
                             <td><?php echo ++$counter; ?></td>
-                            <td><a href="<?php echo current_url().'/'.$class["id"]; ?>" ><?php echo $class["title"]; ?></a></td>
+                            <td><!--<a href="<?php /*echo $url; */?>" >--><?php echo $class["sectionTitle"]; ?><!--</a>--></td>
+                            <td><!--<a href="<?php /*echo $url; */?>" >--><?php echo $class["subjectTitle"]; ?><!--</a>--></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
                     <tfoot>
                     <tr>
-                        <th>مجموع الصفوف</th>
-                        <th><?php echo count($sections) ?></th>
+                        <th>المجموع</th>
+                        <th colspan="2"><?php echo count($sections) ?></th>
                     </tr>
                     </tfoot>
                 </table>

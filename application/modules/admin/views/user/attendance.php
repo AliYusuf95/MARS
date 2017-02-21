@@ -25,11 +25,15 @@
                 <?php echo $form->messages(); ?>
                 <?php if(!$datePicker): ?>
                 <div class="row">
-                    <div class="form-group">
-                        <label for="date" class="col-sm-2 control-label">التاريخ</label>
-                        <div class="col-sm-10">
-                            <?php echo $form->field_dropdown("date",$dates,array(),array("id"=>"date","class"=>"form-control col-sm-3")); ?>
+                    <div class="col-sm-10">
+                        <label for="datepicker" class="col-md-2 col-sm-3 col-xs-3 control-label">تاريخ اليوم</label>
+                        <div id="cal-icon" class="input-group date col-lg-4 col-md-5 col-sm-8 col-xs-9">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input name="date" type="text" value="<?php echo $date ?>" class="form-control pull-right" id="datepicker" readonly>
                         </div>
+                        <!-- /.input group -->
                     </div>
                 </div>
                 <?php else: ?>
@@ -40,7 +44,7 @@
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input name="date" type="text" class="form-control pull-right" id="datepicker">
+                            <input name="date" type="text" value="<?php echo $date ?>" class="form-control pull-right" id="date-picker">
                         </div>
                         <!-- /.input group -->
                     </div>
@@ -76,7 +80,11 @@
                         </tfoot>
                     </table>
                     <div class="form-group">
-                        <?php echo $form->bs3_submit('<i class="fa fa-save"></i> حفظ'); ?>
+                        <?php
+                        echo $form->field_hidden("section",$sectionId);
+                        echo $form->field_hidden("subject",$subjectId);
+                        echo $form->bs3_submit('<i class="fa fa-save"></i> حفظ');
+                        ?>
                     </div>
                 <?php echo $form->close(); ?>
             </div>
@@ -91,14 +99,15 @@
     $(document).ready(function(){
         //Enable iCheck plugin for checkboxes
         //iCheck for checkbox and radio inputs
-        $('form input[type="checkbox"]').iCheck({
+        var $iCheck = $('form input[type="checkbox"]');
+        $iCheck.iCheck({
             checkboxClass: 'icheckbox_flat-grey',
             radioClass: 'iradio_flat-grey'
         });
 
         $('#count').text($('input[type="checkbox"]:checked').length);
 
-        $('form input[type="checkbox"]').on('ifChanged', function(event){
+        $iCheck.on('ifChanged', function(event){
             console.log();
             $('#count').text($('input[type="checkbox"]:checked').length);
         });
@@ -131,7 +140,8 @@
         });
         <?php if ($datePicker): ?>
         //Date picker
-        $('#datepicker').datepicker({
+        var $datePicker = $('#date-picker');
+        $datePicker.datepicker({
             autoclose: true,
             rtl: true,
             language: 'ar',
@@ -143,12 +153,19 @@
             disableTouchKeyboard: true
         });
         $('#cal-icon').on('click', function(e){
-            $('#datepicker').datepicker('show');
+            $datePicker.datepicker('show');
         }).on('changeDate', function(e) {
-            var disableDays = [<?php echo "$daysOfWeekHighlighted"; ?>];
-            if(disableDays.indexOf(e.date.getDay()) == -1)
-                swal('ملاحظة','اليوم الذي اخترته غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.','warning');
+            checkDate(e.date);
         });
+
+        function checkDate(date) {
+            var disableDays = [<?php echo "$daysOfWeekHighlighted"; ?>];
+            if(disableDays.indexOf(date.getDay()) == -1)
+                swal('ملاحظة','اليوم الذي اخترته غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.','warning');
+        }
+
+        checkDate($datePicker.datepicker("getDate"));
+
         <?php endif; ?>
     });
 </script>
