@@ -235,7 +235,7 @@ class Teacher extends Admin_Controller
         $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
         $this->db->join('classes', 'classes.id = classes_subjects.class_id');
         $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->join('admin_users_sections', 'sections.id = admin_users_sections.section_id');
+        $this->db->join('admin_users_sections', 'sections.id = admin_users_sections.section_id AND subjects.id = admin_users_sections.subject_id');
         $this->db->join('admin_users', 'admin_users.id = admin_users_sections.admin_user_id');
         $this->db->where('admin_users_sections.admin_user_id IS NOT',NULL);
         $this->db->where("start_date <=",$date);
