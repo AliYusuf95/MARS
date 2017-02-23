@@ -11,12 +11,12 @@
 			<?php echo $form->bs3_text('إسم المستخدم', 'username', ENVIRONMENT==='development' ? 'webmaster' : ''); ?>
 			<?php echo $form->bs3_password('كلمة المرور', 'password', ENVIRONMENT==='development' ? 'webmaster' : ''); ?>
 			<div class="row">
-				<div class="col-xs-8">
+				<div class="col-sm-8 col-xs-6">
 					<div class="checkbox">
 						<label><input type="checkbox" name="remember"> تذكرني</label>
 					</div>
 				</div>
-				<div class="col-xs-4">
+				<div class="col-sm-4 col-xs-6">
 					<?php echo $form->bs3_submit('تسجيل الدخول', 'btn btn-primary btn-block btn-flat'); ?>
 				</div>
 			</div>

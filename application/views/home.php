@@ -60,10 +60,15 @@
     }
 </style>
 <div class="container">
-    <p>view file: /application/views/home.php</p>
 </div>
 <?php if(isset($counters)): ?>
 <section id="counters" class="container text-center">
+    <div class="row">
+        <div class="col-md-12">
+            <h1> إحصائيات التعليم </h1>
+        </div>
+    </div>
+    <br/>
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <ul class="list-inline counters-list">

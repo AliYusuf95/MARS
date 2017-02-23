@@ -93,6 +93,7 @@ $config['ci_bootstrap'] = array(
             'url'         => 'general',
             'icon'        => 'fa fa-sliders',
             'children'  => array(
+                'التقارير'              => 'general/reports',
                 'السنوات الدراسية'      => 'general/terms',
                 'الفصول الدراسية'       => 'general/semesters',
                 'المستويات الدراسية'    => 'general/levels',

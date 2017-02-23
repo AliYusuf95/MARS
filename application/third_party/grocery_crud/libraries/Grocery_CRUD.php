@@ -1753,21 +1753,27 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 	protected function _print_webpage($data)
 	{
+        $ci = &get_instance();
+        $config = $ci->db->select()->from('config')->get()->first_row();
+        $headerImage = base_url('assets/uploads/'.$config->header_image);
 		$string_to_print = "<!DOCTYPE html><html moznomarginboxes lang=\"en\"><head><meta charset=\"utf-8\" /><style type=\"text/css\" >
         @page {size: auto; margin: 0;}
         html {background-color: #FFFFFF;margin: 0;}
         body {direction: rtl;margin: 10mm 15mm 10mm 15mm;}
+		.header{display: block;margin: 0 auto 30px auto;width: 100%;max-width: 1100px;}
 		#print-table{ color: #000; background: #fff; font-size: 13px;}
 		#print-table table tr td, #print-table table tr th{ border: 1px solid black; border-bottom: none; border-right: none; padding: 4px 8px 4px 4px}
 		#print-table table{ border-bottom: 1px solid black; border-right: 1px solid black}
 		#print-table table tr th{background: #ddd !important}
 		#print-table table tr:nth-child(odd){background: #eee !important}
 		@media print {
+		.header{max-width: 1100px !important;}
 		body {mso-print-color: yes; -webkit-print-color-adjust: exact;}
 		#print-table table tr th{background: #ddd !important;} 
 		#print-table table tr:nth-child(odd){background: #eee !important;}
 		}
 		</style></head><body>";
+		$string_to_print .= "<img class='header' src='$headerImage'>";
 		$string_to_print .= "<div id='print-table'>";
 
 		$string_to_print .= '<table width="100%" cellpadding="0" cellspacing="0" ><tr>';
@@ -2661,9 +2667,37 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 	protected function get_upload_file_readonly_input($field_info,$value)
 	{
-		$file = $file_url = base_url().$field_info->extras->upload_path.'/'.$value;
+        $file = $file_url = base_url().$field_info->extras->upload_path.'/'.$value;
 
-		$value = !empty($value) ? '<a href="'.$file.'" target="_blank">'.$value.'</a>' : '';
+        if(empty($value))
+        {
+            $value = "";
+        }
+        else
+        {
+            $is_image = !empty($value) &&
+            ( substr($value,-4) == '.jpg'
+                || substr($value,-4) == '.png'
+                || substr($value,-5) == '.jpeg'
+                || substr($value,-4) == '.gif'
+                || substr($value,-5) == '.tiff')
+                ? true : false;
+
+            $file_url = base_url().$field_info->extras->upload_path."/$value";
+
+            $file_url_anchor = '<a href="'.$file_url.'"';
+            if($is_image)
+            {
+                $file_url_anchor .= ' class="image-thumbnail"><img src="'.$file_url.'" height="150px">';
+            }
+            else
+            {
+                $file_url_anchor .= ' target="_blank">'.$this->character_limiter($value,$this->character_limiter,'...',true);
+            }
+            $file_url_anchor .= '</a>';
+
+            $value = $file_url_anchor;
+        }
 
 		return $this->get_readonly_input($field_info, $value);
 	}
@@ -3592,6 +3626,7 @@ class Grocery_CRUD extends grocery_CRUD_States
 	protected $character_limiter    = null;
 	protected $config    			= null;
 
+	protected $allow_file_types     = null;
 	protected $add_fields			= null;
 	protected $edit_fields			= null;
 	protected $read_fields			= null;
@@ -4500,6 +4535,12 @@ class Grocery_CRUD extends grocery_CRUD_States
 		return $this;
 	}
 
+	public function allow_file_types($file_types = '')
+    {
+        $this->allow_file_types = is_string($file_types) ? $file_types : '';
+        return $this;
+    }
+
 	protected function _initialize_helpers()
 	{
 		$ci = &get_instance();
@@ -4519,7 +4560,8 @@ class Grocery_CRUD extends grocery_CRUD_States
 		$this->config->default_language 	= $ci->config->item('grocery_crud_default_language');
 		$this->config->date_format 			= $ci->config->item('grocery_crud_date_format');
 		$this->config->default_per_page		= $ci->config->item('grocery_crud_default_per_page');
-		$this->config->file_upload_allow_file_types	= $ci->config->item('grocery_crud_file_upload_allow_file_types');
+		$this->config->file_upload_allow_file_types	= $this->allow_file_types == null ?
+            $ci->config->item('grocery_crud_file_upload_allow_file_types') : $this->allow_file_types;
 		$this->config->file_upload_max_file_size	= $ci->config->item('grocery_crud_file_upload_max_file_size');
 		$this->config->default_text_editor	= $ci->config->item('grocery_crud_default_text_editor');
 		$this->config->text_editor_type		= $ci->config->item('grocery_crud_text_editor_type');

@@ -2,12 +2,15 @@
 	$this->set_css('assets/image_crud/css/fineuploader.css');
 	$this->set_css('assets/image_crud/css/photogallery.css');
 	$this->set_css('assets/image_crud/css/colorbox.css');
+	$this->set_css('assets/dist/libraries/sweetalert/sweetalert2.min.css');
 
 	//$this->set_js('assets/image_crud/js/jquery-1.8.2.min.js');
 	$this->set_js('assets/image_crud/js/jquery-ui-1.9.0.custom.min.js');
+	$this->set_js('assets/dist/libraries/sweetalert/sweetalert2.js');
 
 	$this->set_js('assets/image_crud/js/fineuploader-3.2.min.js');
 	
+	$this->set_js('assets/image_crud/js/jquery.colorbox-min.js');
 	$this->set_js('assets/image_crud/js/jquery.colorbox-min.js');
 ?>
 <script>
@@ -60,19 +63,25 @@ function createUploader() {
 			 }
 		},
 		debug: true,
-		/*template: '<div class="qq-uploader">' +
-			'<div class="qq-upload-drop-area"><span><?php echo $this->l("upload-drop-area");?></span></div>' +
-			'<div class="qq-upload-button"><?php echo $this->l("upload_button");?></div>' +
-			'<ul class="qq-upload-list"></ul>' +
-			'</div>',
-		fileTemplate: '<li>' +
-			'<span class="qq-upload-file"></span>' +
-			'<span class="qq-upload-spinner"></span>' +
-			'<span class="qq-upload-size"></span>' +
-			'<a class="qq-upload-cancel" href="#"><?php echo $this->l("upload-cancel");?></a>' +
-			'<span class="qq-upload-failed-text"><?php echo $this->l("upload-failed");?></span>' +
-			'</li>',
-*/
+        template: '<div class="qq-uploader">' +
+       '<div class="qq-upload-drop-area"><span><?php echo $this->l("upload-drop-area");?></span></div>'+
+        '<div class="qq-upload-button"><div><?php echo $this->l("upload_button");?></div></div>'+
+        '<span class="qq-drop-processing"><span><?php echo $this->l("loading");?></span><span class="qq-drop-processing-spinner"></span></span>' +
+        '<ul class="qq-upload-list"></ul>'+
+        '</div>',
+//		/*template: '<div class="qq-uploader">' +
+//			'<div class="qq-upload-drop-area"><span><?php //echo $this->l("upload-drop-area");?>//</span></div>' +
+//			'<div class="qq-upload-button"><?php //echo $this->l("upload_button");?>//</div>' +
+//			'<ul class="qq-upload-list"></ul>' +
+//			'</div>',
+//		fileTemplate: '<li>' +
+//			'<span class="qq-upload-file"></span>' +
+//			'<span class="qq-upload-spinner"></span>' +
+//			'<span class="qq-upload-size"></span>' +
+//			'<a class="qq-upload-cancel" href="#"><?php //echo $this->l("upload-cancel");?>//</a>' +
+//			'<span class="qq-upload-failed-text"><?php //echo $this->l("upload-failed");?>//</span>' +
+//			'</li>',
+//*/
 	});
 }
 
@@ -111,22 +120,29 @@ window.onload = createUploader;
 	<?php if(!empty($photos)){?>
 	<script type='text/javascript'>
 		$(function(){
-			$('.delete-anchor').click(function(){
-				if(confirm('<?php echo $this->l("alert_delete");?>'))
-				{
-					$.ajax({
-						url:$(this).attr('href'),
-						beforeSend: function()
-						{
-							$('.file-upload-messages-container:first').show();
-							$('.file-upload-message').html("<?php echo $this->l('deleting');?>");
-						},
-						success: function(){
-							loadPhotoGallery();
-						}
-					});
-				}
-				return false;
+			$('.delete-anchor').click(function(e){
+			    var $delete = $(this);
+                swal({
+                    title: '<?php echo $this->l("alert_delete");?>',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<?php echo $this->l("alert_yes");?>',
+                    cancelButtonText: '<?php echo $this->l("alert_cancel");?>'
+                }).then(function () {
+                    $.ajax({
+                        url:$delete.attr('href'),
+                        beforeSend: function()
+                        {
+                            $('.file-upload-messages-container:first').show();
+                            $('.file-upload-message').html("<?php echo $this->l('deleting');?>");
+                        },
+                        success: function(){
+                            loadPhotoGallery();
+                        }
+                    });
+                },function (e) {});
+                e.preventDefault();
+				//return false;
 			});
 			$(".color-box img").mousedown(function(){
 				return false;

@@ -7,7 +7,7 @@
  */
 ?>
 
-<?php if(count($users) < 1): ?>
+<?php if(count($users) < 1 && !$datePicker): ?>
 <div class="row">
     <div class="col-md-12">
         <div class="box box-danger">

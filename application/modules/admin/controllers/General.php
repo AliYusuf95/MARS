@@ -13,6 +13,24 @@ class General extends Admin_Controller {
         $this->push_breadcrumb($this->mPageTitleSmall);
     }
 
+    public function reports()
+    {
+        //$crud = $this->generate_image_crud('config','logo_image','assets/uploads');
+        // Setup crud
+        $crud = $this->generate_crud('config','الإعدادات');
+        $crud->columns('logo_image','header_image')
+            ->display_as('logo_image','الشعار')
+            ->display_as('header_image','رأس الصفحة')
+            ->set_field_upload('logo_image','assets/uploads')
+            ->set_field_upload('header_image','assets/uploads')
+            ->allow_file_types('gif|jpeg|jpg|png')
+            ->limit(1)
+            ->unset_add()
+            ->unset_delete();
+        $this->mPageTitle = 'التقارير';
+        $this->render_crud();
+    }
+
     public function terms()
     {
         // Setup crud

@@ -7,6 +7,10 @@
 
 require APPPATH."core/Base_Model.php";
 
+/**
+ * @property CI_DB_query_builder db
+ * @property CI_Input input
+ */
 class MY_Model extends Base_Model {
 
 	// Override variables from Base_Model

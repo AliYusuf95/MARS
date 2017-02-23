@@ -1,12 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * @property Admin_user_model admin_users
+ * @property Admin_users_sections_model admin_users_sections
+ * @property Subject_model subjects
+ * @property Section_model sections
+ * @property Admin_users_attendance_model teachers_attendance
+ */
 class Teacher extends Admin_Controller
 {
 
     public $autoload = array(
-        'model' => array('User_model' => 'users',
-            'Class_model' => 'classes')
+        'model' => array(
+            'Admin_user_model'=> 'admin_users',
+            'Admin_users_sections_model' => 'admin_users_sections',
+            'Admin_users_attendance_model' => 'teachers_attendance',
+            'Subject_model' => 'subjects',
+            'Section_model' => 'sections'
+        )
     );
 
     private $form;
@@ -43,6 +55,11 @@ class Teacher extends Admin_Controller
         $this->render_crud();
     }
 
+    public function reports_attendance()
+    {
+
+    }
+
     public function attendance($date = null)
     {
         if ($date == null)
@@ -54,57 +71,9 @@ class Teacher extends Admin_Controller
 
         if ($this->input->server('REQUEST_METHOD') == 'POST') {
             if ($this->form->validate()) {
-                $date = $this->input->post('date');
-                $idList = $this->input->post('id');
-                $sectionList = $this->input->post('section');
-                $subjectList = $this->input->post('subject');
-                $attendanceList = $this->input->post('attendance');
-                $commentList = $this->input->post('comment');
+                // update attendance
+                $this->teachers_attendance->updateTeachersAttendants($this->mUser->id);
 
-                // get attendance list od date if exist
-                $updateList = $this->getTeachersAttendance($sectionList, $subjectList, $date);
-
-                // try to insert or update
-                for ($i=0 ; $i < count($idList) ; $i++) {
-                    $update = false; // update flag
-                    // check if it's need to update
-                    for ($j=0 ; $j < count($updateList) ; $j++) {
-                        if ($idList[$i] == $updateList[$j]['admin_user_id'] &&
-                            $sectionList[$i] == $updateList[$j]['section_id'] &&
-                            $subjectList[$i] == $updateList[$j]['subject_id']) {
-                            $attendance = array(
-                                'admin_user_id' => $idList[$i],
-                                'section_id' => $sectionList[$i],
-                                'subject_id' => $subjectList[$i],
-                                'status' => isset($attendanceList[$idList[$i].'-'.$sectionList[$i].'-'.$subjectList[$i]]) ? true : false,
-                                'comment' => $commentList[$i],
-                                'by_admin_user_id' => $this->mUser->id
-                            );
-
-                            $this->db->update('admin_users_attendance', $attendance,
-                                array('admin_user_id' => $idList[$i],
-                                    'section_id' => $sectionList[$i],
-                                    'subject_id' => $subjectList[$i],
-                                    'date' => $date)
-                            );
-                            $update = true; // change update flag
-                            break;
-                        }
-                    }
-                    // otherwise inset new record
-                    if (!$update){
-                        $attendance = array(
-                            'admin_user_id' => $idList[$i],
-                            'section_id' => $sectionList[$i],
-                            'subject_id' => $subjectList[$i],
-                            'date' => $date,
-                            'status' => isset($attendanceList[$idList[$i].'-'.$sectionList[$i].'-'.$subjectList[$i]]) ? true : false,
-                            'comment' => $commentList[$i],
-                            'by_admin_user_id' => $this->mUser->id
-                        );
-                        $this->db->insert('admin_users_attendance', $attendance);
-                    }
-                }
                 $this->system_message->set_success("تم الحفظ بنجاح");
                 refresh();
             } else {
@@ -117,8 +86,8 @@ class Teacher extends Admin_Controller
             $date = date("Y-m-d");
             $this->mViewData["datePicker"] = false;
 
-            $users = $this->getTeachersOfDate($date);
-            $users = $this->getTeachersStatus($users,$date);
+            $users = $this->admin_users_sections->getTeachersOfDate($date);
+            $users = $this->admin_users_sections->getTeachersStatus($users,$date);
             $this->mViewData["users"] = $users;
         }
         else {
@@ -126,14 +95,14 @@ class Teacher extends Admin_Controller
                 $date = date("Y-m-d");
 
             $this->mViewData["datePicker"] = true;
-            $users = $this->getTeachersOfDate($date);
-            $users = $this->getTeachersStatus($users,$date);
+            $users = $this->admin_users_sections->getTeachersOfDate($date);
+            $users = $this->admin_users_sections->getTeachersStatus($users,$date);
             $this->mViewData["users"] = $users;
 
             $this->load->model('admin_users_sections_model', 'teachers');
-            $this->mViewData["availableTeachers"] = $this->getAvailableTeachers();
-            $this->mViewData["availableSubjects"] = $this->getAvailableSubjects($date);
-            $this->mViewData["availableSections"] = $this->getAvailableSections($date);
+            $this->mViewData["availableTeachers"] = $this->admin_users->getActiveAdminUsers();
+            $this->mViewData["availableSubjects"] = $this->subjects->getAvailableSubjects($date);
+            $this->mViewData["availableSections"] = $this->sections->getAvailableSections($date);
         }
 
         $this->mViewData["attendanceDate"] = $date;
@@ -176,118 +145,10 @@ class Teacher extends Admin_Controller
         $this->render_crud();
     }
 
-    private function getAvailableSections($date)
-    {
-        $this->db->distinct();
-        $this->db->select('sections.id as id, sections.title as title');
-        $this->db->from('semesters');
-        $this->db->join('subjects', 'semesters.id = subjects.semester_id');
-        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
-        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
-        $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->where("start_date <=",$date);
-        $this->db->where("end_date >=",$date);
-        return $this->db->get()->result_array();
-    }
-
-    private function getAvailableSubjects($date)
-    {
-        $this->db->distinct();
-        $this->db->select('subjects.id as id, subjects.title as title');
-        $this->db->from('semesters');
-        $this->db->join('subjects', 'semesters.id = subjects.semester_id');
-//        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
-//        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
-//        $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->where("start_date <=",$date);
-        $this->db->where("end_date >=",$date);
-        return $this->db->get()->result_array();
-    }
-
-    private function getAvailableTeachers()
-    {
-        $this->db->distinct();
-        $this->db->select('admin_users.id as id, admin_users.name as name, IFNULL(admin_users.mobile,"-") as mobile');
-        $this->db->from('admin_users');
-        $this->db->where("active",1);
-//        $this->db->from('semesters');
-//        $this->db->join('subjects', 'semesters.id = subjects.semester_id');
-//        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
-//        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
-//        $this->db->join('sections', 'classes.id = sections.class_id');
-//        $this->db->join('admin_users_sections', 'sections.id = admin_users_sections.section_id');
-//        $this->db->join('admin_users', 'admin_users.id = admin_users_sections.admin_user_id');
-//        $this->db->join('admin_users_attendance', 'admin_users.id = admin_users_attendance.admin_user_id');
-//        $this->db->where('admin_users_sections.admin_user_id IS NOT',NULL);
-//        $this->db->where("start_date <=",$date);
-//        $this->db->where("end_date >=",$date);
-        return $this->db->get()->result_array();
-    }
-
-    private function getTeachersOfDate($date)
-    {
-        // get teachers from admin users table
-        $this->db->select('admin_users.id as id, admin_users.name as name, IFNULL(admin_users.mobile,"-") as mobile');
-        $this->db->select('sections.id as sectionId, sections.title as sectionTitle');
-        $this->db->select('admin_users_sections.subject_id as subjectId, subjects.title as subjectTitle');
-        $this->db->from('semesters');
-        $this->db->join('subjects', 'semesters.id = subjects.semester_id');
-        $this->db->join('classes_subjects', 'subjects.id = classes_subjects.subject_id');
-        $this->db->join('classes', 'classes.id = classes_subjects.class_id');
-        $this->db->join('sections', 'classes.id = sections.class_id');
-        $this->db->join('admin_users_sections', 'sections.id = admin_users_sections.section_id AND subjects.id = admin_users_sections.subject_id');
-        $this->db->join('admin_users', 'admin_users.id = admin_users_sections.admin_user_id');
-        $this->db->where('admin_users_sections.admin_user_id IS NOT',NULL);
-        $this->db->where("start_date <=",$date);
-        $this->db->where("end_date >=",$date);
-        $this->db->like('subjects.dates',date("D",strtotime($date)));
-        $query1 = $this->db->get()->result_array();
-
-        // get teachers from attendance table
-        $this->db->select('admin_users.id as id, admin_users.name as name, IFNULL(admin_users.mobile,"-") as mobile');
-        $this->db->select('sections.id as sectionId, sections.title as sectionTitle');
-        $this->db->select('subject_id as subjectId, subjects.title as subjectTitle');
-        $this->db->from('admin_users_attendance');
-        $this->db->join('admin_users', 'admin_users.id = admin_users_attendance.admin_user_id');
-        $this->db->join('sections', 'sections.id = admin_users_attendance.section_id');
-        $this->db->join('subjects', 'subjects.id = subject_id');
-        $this->db->where("admin_users_attendance.date",$date);
-        $query2 = $this->db->get()->result_array();
-
-        return array_merge(array_filter($query1, function($e) use ($query2) {return !in_array($e, $query2);}),$query2);
-    }
-
-    private function getTeachersStatus($users,$date)
-    {
-        foreach ($users as &$user){
-            $this->db->select('`status`,`comment`');
-            $this->db->from('admin_users_attendance');
-            $this->db->where('admin_user_id',$user["id"]);
-            $this->db->where('section_id',$user["sectionId"]);
-            $this->db->where('subject_id',$user["subjectId"]);
-            $this->db->where('date',$date);
-            $result = $this->db->get()->result_array();
-            $user['status'] = isset($result[0]['status']) ? $result[0]['status'] : false;
-            $user['comment'] = isset($result[0]['comment']) ? $result[0]['comment'] : '';
-        }
-
-        return $users;
-    }
-
     private function validateDate($date)
     {
         $d = DateTime::createFromFormat('Y-m-d', $date);
         return $d && $d->format('Y-m-d') === $date;
     }
 
-    private function getTeachersAttendance($sections, $subjects, $date)
-    {
-        $this->db->distinct();
-        $this->db->select('admin_user_id, section_id, subject_id');
-        $this->db->from('admin_users_attendance');
-        $this->db->where_in('section_id', $sections);
-        $this->db->where_in('subject_id', $subjects);
-        $this->db->where('date',$date);
-        return $this->db->get()->result_array();
-    }
 }
