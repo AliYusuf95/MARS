@@ -10,6 +10,7 @@ class Login extends MY_Controller {
 	 */
 	public function index()
 	{
+        $this->mPageTitle = 'تسجيل الدخول';
 		$this->load->library('form_builder');
 		$form = $this->form_builder->create_form();
 

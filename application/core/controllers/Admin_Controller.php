@@ -17,6 +17,10 @@ class Admin_Controller extends MY_Controller {
 	// Constructor
 	public function __construct()
 	{
+	    // load models
+	    $this->autoload['model'][]['Admin_groups_permission_model'] = 'groups_permission';
+	    $this->autoload['model'][]['Admin_permission_model'] = 'permission';
+
 		parent::__construct();
 
 		// only login users can access Admin Panel
@@ -26,7 +30,6 @@ class Admin_Controller extends MY_Controller {
 		$this->mUsefulLinks = $this->mConfig['useful_links'];
 
 		// Get Pages Auth from DB
-        $this->load->model('Admin_permission_model', 'permission');
         $this->mPageAuth = $this->permission->getPagesAuth();
         // Check page auth
         $this->restrict_pages();
@@ -34,7 +37,6 @@ class Admin_Controller extends MY_Controller {
 
     protected function verify_page($redirect = TRUE, $url = NULL, $redirect_url = NULL)
     {
-        $this->load->model('Admin_groups_permission_model', 'groups_permission');
         $userGroups = $this->ion_auth->get_users_groups()->result();
         if ( !$this->ion_auth->logged_in() || !$this->groups_permission->validateUrlForGroups($userGroups,$url))
         {
@@ -99,6 +101,20 @@ class Admin_Controller extends MY_Controller {
 
 		if ($this->config->item('grocery_crud_unset_read'))
 			$crud->unset_read();
+
+		$url = $this->mCtrler.'/'.$this->mAction;
+
+		if (!$this->verify_page(false,$url.'/all')){
+
+            if(!$this->verify_page(false,$url.'/add'))
+                $crud->unset_add();
+
+            if(!$this->verify_page(false,$url.'/edit'))
+            $crud->unset_edit();
+
+            if(!$this->verify_page(false,$url.'/delete'))
+		        $crud->unset_delete();
+        }
 
 		foreach ($this->config->item('grocery_crud_display_as') as $key => $value)
 			$crud->display_as($key, $value);

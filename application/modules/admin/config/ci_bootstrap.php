@@ -175,19 +175,19 @@ $config['ci_bootstrap'] = array(
     'login_url' => 'admin/login',
 
     // Restricted pages
-    'page_auth' => array(
-        'user/create'                => array('webmaster', 'admin', 'manager'),
-        'user/group'                => array('webmaster', 'admin', 'manager'),
-        'panel'                        => array('webmaster'),
-        'panel/admin_user'            => array('webmaster'),
-        'panel/admin_user_create'    => array('webmaster'),
-        'panel/admin_user_group'    => array('webmaster'),
-        'util'                        => array('webmaster'),
-        'util/list_db'                => array('webmaster'),
-        'util/backup_db'            => array('webmaster'),
-        'util/restore_db'            => array('webmaster'),
-        'util/remove_db'            => array('webmaster'),
-    ),
+//    'page_auth' => array(
+//        'user/create'                => array('webmaster', 'admin', 'manager'),
+//        'user/group'                => array('webmaster', 'admin', 'manager'),
+//        'panel'                        => array('webmaster'),
+//        'panel/admin_user'            => array('webmaster'),
+//        'panel/admin_user_create'    => array('webmaster'),
+//        'panel/admin_user_group'    => array('webmaster'),
+//        'util'                        => array('webmaster'),
+//        'util/list_db'                => array('webmaster'),
+//        'util/backup_db'            => array('webmaster'),
+//        'util/restore_db'            => array('webmaster'),
+//        'util/remove_db'            => array('webmaster'),
+//    ),
 
     // AdminLTE settings
     'adminlte' => array(

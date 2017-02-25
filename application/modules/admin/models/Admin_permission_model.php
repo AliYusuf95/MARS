@@ -5,8 +5,10 @@
  * User: Ali Yusuf
  * Date: 2/4/2017
  * Time: 12:19 AM
+ * @property Admin_groups_permission_model groups_permission
  */
 class Admin_permission_model extends MY_Model {
+
     public function getPagesAuth(){
         $this->load->model('Admin_groups_permission_model', 'groups_permission');
         $permissions = $this->get_all();
@@ -19,4 +21,5 @@ class Admin_permission_model extends MY_Model {
         }
         return $page_auth;
     }
+
 }

@@ -10,10 +10,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Panel extends Admin_Controller {
 
+    private $isWebmaster = false;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->library('form_builder');
+		// Check webmaster
+        $this->isWebmaster = $this->verify_page(false, 'panel/admin_users/add_webmaster');
         // Set Page small title
         $this->mPageTitleSmall = 'لوحة تحكم الإدارة';
         $this->push_breadcrumb($this->mPageTitleSmall);
@@ -23,7 +27,7 @@ class Panel extends Admin_Controller {
 	public function admin_users()
 	{
 	    // Check webmaster
-	    if (!$isWebmaster = $this->verify_page(false, 'panel/admin_users/add_webmaster'))
+	    if (!$this->isWebmaster)
 	        $where_cause = array('admin_groups.id !='=>1);
 	    else
             $where_cause = null;
@@ -52,12 +56,12 @@ class Panel extends Admin_Controller {
             $crud->add_action('Reset Password', '', $this->mModule.'/panel/admin_user_reset_password', 'fa fa-repeat');
         }
 
-		if ($this->verify_page(false, 'panel/admin_users/add_admin') && !$isWebmaster) {
-            // This validation is used only for webmaster group
+		if ($this->verify_page(false, 'panel/admin_users/add_admin') && !$this->isWebmaster) {
+            // This validation is used only for non webmaster group
             if ($this->form_validation->run() == FALSE) {
                 $crud->set_rules('groups','مجموعة','required');
             }
-        } else if (!$isWebmaster) {
+        } else if (!$this->isWebmaster) {
             $crud->unset_add();
         }
 
@@ -75,9 +79,6 @@ class Panel extends Admin_Controller {
     // Create Admin User
 	public function admin_user_create()
 	{
-		// (optional) only top-level admin user groups can create Admin User
-		//$this->verify_auth(array('webmaster'));
-
 		$form = $this->form_builder->create_form();
 
 		if ($form->validate())
@@ -125,8 +126,16 @@ class Panel extends Admin_Controller {
         $this->verify_page();
         $crud = $this->generate_crud('admin_groups','مجموعة');
         $crud->set_relation_n_n('permissions', 'admin_groups_permissions', 'admin_permissions',
-            'admin_group_id', 'admin_permission_id', 'description');
+            'admin_group_id', 'admin_permission_id', 'description',null,array('admin_permissions.id !='=>1));
+        // remove webmaster group
         $crud->where('id !=',1);
+
+        // Remove groups that have edit permission for non webmaster
+        if (!$this->isWebmaster) {
+            foreach ($this->groups_permission->getGroupsWithPermission('panel/groups') as $id)
+                $crud->where('id !=', $id);
+        }
+
         $crud->display_as('name', 'الإسم')
             ->display_as('description', 'الوصف')
             ->display_as('permissions', 'الصلاحيات');

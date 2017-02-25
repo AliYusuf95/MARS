@@ -2,7 +2,6 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Year extends Admin_Controller {
-    // TODO: add rules
 
     public function __construct()
     {
@@ -20,7 +19,10 @@ class Year extends Admin_Controller {
         $crud->display_as('title','إسم الصف')
             ->display_as('level_id','المستوى الدراسي');
         $crud->set_relation('level_id','levels','title',null,'id');
-        $crud->set_rules('level_id', 'المستوى الدراسي','trim|required|is_unique[classes.level_id]');
+        if ($crud->getState() == 'update' || $crud->getState() == 'update_validation')
+            $crud->set_rules('level_id', 'المستوى الدراسي','trim|required');
+        else
+            $crud->set_rules('level_id', 'المستوى الدراسي','trim|required|is_unique[classes.level_id]');
         $crud->set_rules('title', 'إسم الصف','trim|required');
 
         $this->mPageTitle = 'الصفوف';
@@ -30,7 +32,7 @@ class Year extends Admin_Controller {
     public function sections()
     {
         // Setup crud
-        $crud = $this->generate_crud('sections','الأقسام الدراسية');
+        $crud = $this->generate_crud('sections','فرقة الدراسية');
         $crud->columns('title', 'class_id');
         $crud->display_as('title','إسم الفرقة')
             ->display_as('class_id','الصف الدراسي');

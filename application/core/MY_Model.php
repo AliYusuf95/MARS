@@ -8,6 +8,7 @@
 require APPPATH."core/Base_Model.php";
 
 /**
+ * @property MX_Loader load
  * @property CI_DB_query_builder db
  * @property CI_Input input
  */
