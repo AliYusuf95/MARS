@@ -2,7 +2,7 @@
 
 class Section_model extends MY_Model {
 
-    public function getSectionStudents($sectionId)
+    public function getSectionStudentsWithStatus($sectionId, $date)
     {
         $query = $this->db->select('users.id as id, name, IFNULL(mobile,"-") as mobile')
             ->from('users')
@@ -15,12 +15,21 @@ class Section_model extends MY_Model {
             $result = $this->db->select('users_attendance.`status`')
                 ->from('users_attendance')
                 ->where('user_id',$user["id"])
-                ->where('date',date("Y-m-d"))
+                ->where('date',$date)
                 ->get()->result_array();
             $user['status'] = isset($result[0]['status']) ? $result[0]['status'] : false ;
         }
 
         return $query;
+    }
+
+    public function getUsersInSection($sectionId) {
+        return $this->db->select('users.id as id, name')
+            ->from('users')
+            ->join('users_sections', 'users.id = users_sections.user_id')
+            ->where('users_sections.section_id',$sectionId)
+            ->order_by('name', 'ASC')
+            ->get()->result_array();
     }
 
     public function getAvailableSections($date)

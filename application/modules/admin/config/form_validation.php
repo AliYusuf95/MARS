@@ -83,8 +83,13 @@ $config = array(
 		array(
 			'field'		=> 'username',
 			'label'		=> 'مسمى تسجيل الدخول',
-			'rules'		=> 'required|is_unique[users.username]|is_not_arabic_text',
+			'rules'		=> 'required|is_unique[admin_users.username]|is_not_arabic_text',
 		),
+        array(
+            'field'		=> 'cpr',
+            'label'		=> 'الرقم الشخصي',
+            'rules'		=> 'required|is_unique[admin_users.cpr]|integer|exact_length[9]',
+        ),
 		array(
 			'field'		=> 'name',
 			'label'		=> 'الإسم',
@@ -94,7 +99,7 @@ $config = array(
 		array(
 			'field'		=> 'email',
 			'label'		=> 'البريد الإلكتروني',
-			'rules'		=> 'valid_email|is_unique[users.email]',
+			'rules'		=> 'valid_email|is_unique[admin_users.email]',
 		),
         array(
             'field'		=> 'mobile',

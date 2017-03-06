@@ -27,7 +27,7 @@
 			<div class="user-panel" style="height:65px">
 				<div class="pull-left info" style="left:5px">
 					<p><?php echo $user->name; ?></p>
-					<a href="panel/account"><i class="fa fa-circle text-success"></i> Online</a>
+					<a href="panel/account"><i class="fa fa-circle text-green"></i> متواجد</a>
 				</div>
 			</div>
 			<?php // (Optional) Add Search box here ?>

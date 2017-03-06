@@ -7,6 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property Admin_users_sections_model teacher_sections
  * @property Section_model sections
  * @property Subject_model subjects
+ * @property Users_attendance_model user_attendance
  */
 class User extends Admin_Controller {
 
@@ -21,6 +22,7 @@ class User extends Admin_Controller {
             'Section_model' => 'sections',
             'Subject_model' => 'subjects',
             'Admin_users_sections_model' => 'teacher_sections',
+            'Users_attendance_model' => 'user_attendance',
         )
     );
     private $days = array(
@@ -217,11 +219,14 @@ class User extends Admin_Controller {
         $this->render('user/reset_password');
     }
 
-    public function attendance($sectionId = '', $subjectId = ''){
+    public function attendance($sectionId = null, $subjectId = null, $date = null){
         // create form variable
         $this->mViewData['form'] = $this->form;
         // pass data to the view
         $this->mPageTitle = "تسجيل الحضور";
+
+        if ($date == null)
+            $date = date("Y-m-d");
 
         if ($this->input->server('REQUEST_METHOD') == 'POST') {
             if ($this->form->validate()) {
@@ -232,7 +237,7 @@ class User extends Admin_Controller {
                 $attendanceList = $this->input->post('attendance');
 
                 // get attendance list od date if exist
-                $updateList = $this->users->getStudentsAttendance($section_id, $subject_id, $date);
+                $updateList = $this->user_attendance->getStudentsAttendanceOnDate($section_id, $subject_id, $date);
 
                 // try to insert or update
                 for ($i=0 ; $i < count($idList) ; $i++) {
@@ -275,7 +280,7 @@ class User extends Admin_Controller {
             }
         }
 
-        if ($sectionId == '' || $subjectId == '')
+        if ($sectionId == null || $subjectId == null)
         {
             if (!$this->verify_page(false,'user/previous_days_attendance') &&
                 !$this->verify_page(false,'user/any_day_attendance')) {
@@ -298,7 +303,7 @@ class User extends Admin_Controller {
             $this->render('user/attendance_wrong_section');
         }
         // Not valid date AND don't has permissions
-        else if (!$this->isValidDate($subjectId,date("Y-m-d")) &&
+        else if (!$this->isValidDate($subjectId,$date) &&
             !$this->verify_page(false,'user/previous_days_attendance') &&
             !$this->verify_page(false,'user/any_day_attendance')) {
 
@@ -331,10 +336,10 @@ class User extends Admin_Controller {
                 }
             }
 
-            $this->mViewData["date"] = date("Y-m-d");
+            $this->mViewData["date"] = $date;
             $this->mViewData["sectionId"] = $sectionId;
             $this->mViewData["subjectId"] = $subjectId;
-            $this->mViewData["users"] = $this->sections->getSectionStudents($sectionId);
+            $this->mViewData["users"] = $this->sections->getSectionStudentsWithStatus($sectionId,$date);
 
             // add iCheck plugin
             $this->add_stylesheet("assets/dist/libraries/iCheck/skins/flat/grey.css");
@@ -349,6 +354,28 @@ class User extends Admin_Controller {
 
             //render
             $this->render('user/attendance');
+        }
+    }
+
+    public function report($sectionId = null, $subjectId = null) {
+        // create form variable
+        $this->mViewData['form'] = $this->form;
+        // pass data to the view
+        $this->mPageTitle = "حضور الطلاب";
+
+        if ($sectionId == null || $subjectId == null)
+        {
+            $this->mViewData["sections"] = $this->sections->getAllSections();
+            $this->mViewData["baseUrl"] = base_url($this->mModule.'/'.$this->mLanguage.'/'.$this->mCtrler.'/'.$this->mAction);
+            //render
+            $this->render('user/attendance_sections');
+        } else {
+            $this->mPageTitle = $this->sections->select('title')->get($sectionId)->title
+                .' - '.$this->subjects->select('title')->get($subjectId)->title;
+            $this->mViewData["data"] = $this->user_attendance->getAllStudentsAttendance($sectionId,$subjectId);
+
+            $this->add_script('assets/dist/libraries/printElement/jquery.printElement.js');
+            $this->render('user/report_attendance');
         }
     }
 

@@ -63,7 +63,7 @@ $config['ci_bootstrap'] = array(
     ),
 
     // Default CSS class for <body> tag
-    'body_class' => '',
+    'body_class' => 'skin-blue sidebar-mini',
 
     // Multilingual settings
     'languages' => array(
@@ -106,7 +106,7 @@ $config['ci_bootstrap'] = array(
             'icon'        => 'fa fa-calendar',
             'children'  => array(
                 'الصفوف'                => 'year/classes',
-                'الأقسام'                => 'year/sections',
+                'الفرق'                => 'year/sections',
                 'المواد'                => 'year/subjects',
                 'توزيع درجات المواد'    => 'year/grades',
                 'مواد الصفوف'           => 'year/class_subject',
@@ -143,6 +143,7 @@ $config['ci_bootstrap'] = array(
                 //'إضافة طالب'            => 'user/create',
                 'المجموعات'       => 'user/group',
                 'تسجيل الحضور'            => 'user/attendance',
+                'حضور الطلاب'            => 'user/report',
             )
         ),
         'panel' => array(
@@ -175,27 +176,22 @@ $config['ci_bootstrap'] = array(
     'login_url' => 'admin/login',
 
     // Restricted pages
-//    'page_auth' => array(
-//        'user/create'                => array('webmaster', 'admin', 'manager'),
-//        'user/group'                => array('webmaster', 'admin', 'manager'),
-//        'panel'                        => array('webmaster'),
-//        'panel/admin_user'            => array('webmaster'),
-//        'panel/admin_user_create'    => array('webmaster'),
-//        'panel/admin_user_group'    => array('webmaster'),
-//        'util'                        => array('webmaster'),
-//        'util/list_db'                => array('webmaster'),
-//        'util/backup_db'            => array('webmaster'),
-//        'util/restore_db'            => array('webmaster'),
-//        'util/remove_db'            => array('webmaster'),
-//    ),
+    // All restrictions are dynamic from db
+    /*'page_auth' => array(
+        'util'                        => array('webmaster'),
+        'util/list_db'                => array('webmaster'),
+        'util/backup_db'            => array('webmaster'),
+        'util/restore_db'            => array('webmaster'),
+        'util/remove_db'            => array('webmaster'),
+    ),*/
 
     // AdminLTE settings
     'adminlte' => array(
         'body_class' => array(
-            'webmaster'    => 'skin-red sidebar-mini',
-            'admin'        => 'skin-purple sidebar-mini',
+            'webmaster'    => 'skin-blue-light sidebar-mini',
+            'admin'        => 'skin-red sidebar-mini',
             'manager'    => 'skin-black sidebar-mini',
-            'staff'        => 'skin-blue sidebar-mini',
+            'staff'        => 'skin-blue-light sidebar-mini',
         )
     ),
 

@@ -32,7 +32,7 @@ class Year extends Admin_Controller {
     public function sections()
     {
         // Setup crud
-        $crud = $this->generate_crud('sections','فرقة الدراسية');
+        $crud = $this->generate_crud('sections','فرقة');
         $crud->columns('title', 'class_id');
         $crud->display_as('title','إسم الفرقة')
             ->display_as('class_id','الصف الدراسي');
@@ -41,7 +41,7 @@ class Year extends Admin_Controller {
         $crud->set_rules('title', 'إسم الفرقة','trim|required');
         $crud->set_rules('class_id', 'الصف الدراسي','trim|required');
 
-        $this->mPageTitle = 'الأقسام';
+        $this->mPageTitle = 'الفرق';
         $this->render_crud();
     }
 

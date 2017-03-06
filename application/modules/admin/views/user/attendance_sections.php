@@ -28,10 +28,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </thead>
                     <tbody  id="students-table">
                     <?php $counter = 0 ; ?>
-                    <?php foreach ($sections as $class):
-                        $baseUrl .= '/'.$class["sectionId"].'/'.$class["subjectId"];
-                        ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='<?php echo $baseUrl; ?>';">
+                    <?php foreach ($sections as $class): ?>
+                        <tr style="cursor: pointer;" onclick="window.location.href='<?php echo $baseUrl.'/'.$class["sectionId"].'/'.$class["subjectId"]; ?>';">
                             <td><?php echo ++$counter; ?></td>
                             <td><!--<a href="<?php /*echo $url; */?>" >--><?php echo $class["sectionTitle"]; ?><!--</a>--></td>
                             <td><!--<a href="<?php /*echo $url; */?>" >--><?php echo $class["subjectTitle"]; ?><!--</a>--></td>

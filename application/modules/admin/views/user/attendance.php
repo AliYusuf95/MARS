@@ -13,7 +13,7 @@
                 <h3 class="box-title">قائمة الأسماء</h3>
                 <div class="box-tools pull-right">
                     <div class="has-feedback">
-                        <input id="searchInput" type="search" class="form-control input-sm" placeholder="بحث">
+                        <input id="searchInput" type="search" class="form-control col-xs-9 col-sm-12 col-lg-12 search-input input-sm" placeholder="بحث">
                         <span class="glyphicon glyphicon-search form-control-feedback"></span>
                     </div>
                 </div>
@@ -141,30 +141,49 @@
         <?php if ($datePicker): ?>
         //Date picker
         var $datePicker = $('#date-picker');
+        var currentDate = $datePicker.val();
         $datePicker.datepicker({
             autoclose: true,
             rtl: true,
             language: 'ar',
             format: 'yyyy-mm-dd',
+            todayHighlight: true,
             startDate: <?php echo "'$startDate'"; ?>,
             endDate: <?php echo "'$endDate'"; ?>,
             daysOfWeekDisabled: <?php echo "'$daysOfWeekDisabled'"; ?>,
             daysOfWeekHighlighted: <?php echo "'$daysOfWeekHighlighted'"; ?>,
             disableTouchKeyboard: true
+        }).on('changeDate', function(e) {
+            var dateString = e.date.getFullYear()+'-'+('0' + (e.date.getMonth()+1)).slice(-2) + '-' + ('0' + e.date.getDate()).slice(-2);
+            var url = 'user/attendance/<?php echo$sectionId.'/'.$subjectId ?>/';
+            if (isDisableDay(e.date)) {
+                swal({
+                    title: 'ملاحظة',
+                    text: "اليوم الذي اخترته غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'متابعة',
+                    cancelButtonText: 'إلغاء'
+                }).then(function () {
+                    $(location).attr('href', url + dateString);
+                }, function (dismiss) {
+                    $datePicker.datepicker('update',currentDate);
+                });
+            }
+            else
+                $(location).attr('href', url + dateString);
         });
         $('#cal-icon').on('click', function(e){
             $datePicker.datepicker('show');
-        }).on('changeDate', function(e) {
-            checkDate(e.date);
         });
 
-        function checkDate(date) {
+        function isDisableDay(date) {
             var disableDays = [<?php echo "$daysOfWeekHighlighted"; ?>];
-            if(disableDays.indexOf(date.getDay()) == -1)
-                swal('ملاحظة','اليوم الذي اخترته غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.','warning');
+            return disableDays.indexOf(date.getDay()) == -1;
         }
 
-        checkDate($datePicker.datepicker("getDate"));
+        if (isDisableDay($datePicker.datepicker("getDate")) && !window.location.pathname.endsWith(currentDate))
+            swal('ملاحظة','اليوم غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.','warning');
 
         <?php endif; ?>
     });

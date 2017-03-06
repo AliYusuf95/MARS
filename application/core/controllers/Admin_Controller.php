@@ -56,7 +56,8 @@ class Admin_Controller extends MY_Controller {
 	{
 		// load skin according to user role
 		$config = $this->mConfig['adminlte'];
-		$this->mBodyClass = $config['body_class'][$this->mUserMainGroup];
+		if(isset($config['body_class'][$this->mUserMainGroup]))
+		    $this->mBodyClass = $config['body_class'][$this->mUserMainGroup];
 
 		// additional view data
 		$this->mViewData['useful_links'] = $this->mUsefulLinks;
@@ -110,9 +111,10 @@ class Admin_Controller extends MY_Controller {
                 $crud->unset_add();
 
             if(!$this->verify_page(false,$url.'/edit'))
-            $crud->unset_edit();
+                $crud->unset_edit();
 
-            if(!$this->verify_page(false,$url.'/delete'))
+            // only web master have delete option
+            if(!$this->verify_page(false, 'panel/admin_users/add_webmaster'))
 		        $crud->unset_delete();
         }
 

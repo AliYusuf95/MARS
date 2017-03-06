@@ -72,7 +72,7 @@ class Panel extends Admin_Controller {
     function add_hint($value = '', $primary_key = null)
     {
         return '<input id="field-name" class="form-control" value="'.$value.
-            '" name="username" type="text" value="manager" maxlength="20" REQUIRED><br/>'.
+            '" name="username" type="text" maxlength="20" REQUIRED><br/>'.
             '<span class="text-red"> *الرجاء كتابة مسمى تسجيل الدخول باللغة الإنجلينزية فقط.</span>';
     }
 
@@ -90,6 +90,7 @@ class Panel extends Admin_Controller {
 			$additional_data = array(
 				'name'	=> $this->input->post('name'),
 				'mobile'		=> $this->input->post('mobile'),
+				'cpr'		=> $this->input->post('cpr'),
 			);
 			$groups = $this->input->post('groups');
 
@@ -126,7 +127,7 @@ class Panel extends Admin_Controller {
         $this->verify_page();
         $crud = $this->generate_crud('admin_groups','مجموعة');
         $crud->set_relation_n_n('permissions', 'admin_groups_permissions', 'admin_permissions',
-            'admin_group_id', 'admin_permission_id', 'description',null,array('admin_permissions.id !='=>1));
+            'admin_group_id', 'admin_permission_id', 'description','updated_at');
         // remove webmaster group
         $crud->where('id !=',1);
 
@@ -139,13 +140,27 @@ class Panel extends Admin_Controller {
         $crud->display_as('name', 'الإسم')
             ->display_as('description', 'الوصف')
             ->display_as('permissions', 'الصلاحيات');
+        $crud->field_type('permissions','text');
         $crud->set_rules('name','الإسم','is_not_arabic_text');
 
         // no need to edit these fields
-        $crud->callback_field('name',array($this,'name_readonly'));
-        $crud->callback_field('description',array($this,'description_readonly'));
+        if ($crud->getState() == 'edit') {
+            $crud->callback_field('name', array($this, 'name_readonly'));
+            $crud->callback_field('description', array($this, 'description_readonly'));
+        }
+
+        if ($crud->getState() == 'add') {
+            $crud->callback_field('name', array($this, 'groups_name_add_hint'));
+        }
 
         $this->render_crud();
+    }
+
+    function groups_name_add_hint($value = '', $primary_key = null)
+    {
+        return '<input id="field-name" class="form-control" value="'.$value.
+            '" name="name" type="text" maxlength="20" REQUIRED><br/>'.
+            '<span class="text-red"> *الرجاء كتابة الاسم باللغة الإنجلينزية فقط.</span>';
     }
 
     function name_readonly($value = '', $primary_key = null) {

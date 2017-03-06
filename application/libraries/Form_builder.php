@@ -212,13 +212,13 @@ class Form {
 	 */
 	public function bs3_text($label, $name, $value = NULL, $extra = array())
 	{
-		$extra['class'] = 'form-control';
+        $extra['class'] = isset($extra['class']) ? $extra['class'].' form-control' : 'form-control';
 		return '<div class="form-group">'.form_label($label, $name).$this->field_text($name, $value, $extra).'</div>';
 	}
 
 	public function bs3_email($label, $name = 'email', $value = NULL, $extra = array())
 	{
-		$extra['class'] = 'form-control';
+        $extra['class'] = isset($extra['class']) ? $extra['class'].' form-control' : 'form-control';
 		return '<div class="form-group">'.form_label($label, $name).$this->field_email($name, $value, $extra).'</div>';
 	}
 
@@ -230,7 +230,7 @@ class Form {
 
 	public function bs3_textarea($label, $name, $value = NULL, $extra = array())
 	{
-		$extra['class'] = 'form-control';
+        $extra['class'] = isset($extra['class']) ? $extra['class'].' form-control' : 'form-control';
 		return '<div class="form-group">'.form_label($label, $name).$this->field_textarea($name, $value, $extra).'</div>';
 	}
 

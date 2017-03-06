@@ -209,7 +209,14 @@ $(function(){
 				_this_button.find('.fbutton>div').css('opacity','1');
 			},
 			success: function(html_data){
-				$("<div/>").html(html_data).printElement();
+                var loaded = 0;
+                var $content = $("<div/>").html(html_data);
+                $content.find('img').on('load', function() {
+                    loaded++;
+                    if(loaded == $content.find('img').length){
+                        $content.printElement();
+                    }
+                });
 			}
 		});
 	});

@@ -360,7 +360,7 @@
 //            if(disableDays.indexOf(e.date.getDay()) == -1)
 //                swal('ملاحظة','اليوم الذي اخترته غير مدرج ضمن أيام التعليم بحسب إعدادات المقرر.','warning');
             var dateString = e.date.getFullYear()+'-'+('0' + (e.date.getMonth()+1)).slice(-2) + '-' + ('0' + e.date.getDate()).slice(-2);
-            console.log(dateString);
+//            console.log(dateString);
             $(location).attr('href', 'teacher/attendance/'+dateString);
         });
         <?php endif; ?>
